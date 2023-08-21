@@ -1,0 +1,5 @@
+entry-point: game
+
+projects:
+  - game
+  - engine

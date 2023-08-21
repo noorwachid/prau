@@ -1,0 +1,44 @@
+# the executable
+program: clang++
+
+# standard flags builder
+standard: -std=c++<standard>
+
+# search directory
+directory:
+  header: -I<directory>
+  library: -L<directory>
+
+# file naming
+file: 
+  object: <source>.o 
+  library: lib<name>.so
+  executable: <name>
+
+# the flag to generate files
+builder:
+  object: -o <file> -c
+  library: -o <file> -fPIC -shared
+  executable: -o <file>
+
+# compiler flags
+flags:
+  - -xc++
+  - -Wall
+  - -Wextra
+
+# OPTIONAL
+# all of the above configurations
+# but for specific platforms
+# currently supported platforms:
+# - linux
+# - darwin
+on-platforms:
+  darwin:
+    file: 
+      library: lib<name>.dylib
+
+    builder:
+      library: -o lib<>.dylib -fPIC -dinamiclib
+
+

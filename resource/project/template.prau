@@ -1,0 +1,101 @@
+# the project name
+# no rule but its best using all lowercase no dash or undersore
+name: hello
+
+# the project description
+description: c++ hello world
+
+# major.minor.patch
+version: 1.2.3
+
+# the main types are: 
+# - library
+# - executable
+type: executable
+
+# c or cpp 
+language: cpp
+
+# OPTIONAL
+license: BSD-3
+
+# OPTIONAL
+# url 
+url: https://noorwach.id/praudhemit
+
+# OPTIONAL
+authors:
+  - John Smith
+  - Lou (lou-level.com) # with website
+  - Juleha (fake@email.com) # with email
+
+# numeric standard 17 will be expanded into c++17
+# specify the full version for specific standard like gnuc++03 or c99
+standard: 17
+
+# OPTIONAL
+# supported platforms
+platforms:
+  - linux
+  - darwin
+  - web
+
+# OPTIONAL
+# list of source files
+sources:
+  - source/main.cpp
+  - source/*.cpp
+
+# OPTIONAL
+# list of header files
+# in linux will be copied to /usr/local/include
+headers:
+  - source/helloworld/message.h
+  - source/helloworld/*.h
+
+# OPTIONAL
+# list of macro include paths
+header-directories:
+  - source
+
+# OPTIONAL
+# list of library being linked
+libraries:
+  - cocoa
+
+# OPTIONAL
+# list of library search paths
+library-directories:
+  - library
+
+# OPTIONAL
+# use * for glob entire directory
+# list of asset files
+# in linux will be copied to /usr/local/share
+assets:
+  - asset/fonts/monospace.ttf
+  - asset/configs/*
+
+# OPTIONAL
+# list of dependency projects
+dependencies:
+  fmt: 0.16.0
+  boostasio: 0.17.3
+  boostfilesystem: 0.17.3
+
+# OPTIONAL
+# all of the above configurations
+# but for specific platforms
+# currently supported platforms:
+# - linux
+# - darwin
+# - web
+on-platforms:
+  darwin:
+    sources:
+      - source/platform/darwin.cpp
+    definitions:
+      - DARWIN_SKIP_RESOURCE_DIR
+    flags:
+      - -framework Cocoa
+

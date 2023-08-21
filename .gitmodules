@@ -1,0 +1,3 @@
+[submodule "dependency/yaml"]
+	path = dependency/yaml
+	url = git@github.com:jbeder/yaml-cpp
