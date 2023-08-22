@@ -55,7 +55,7 @@ headers:
 
 # OPTIONAL
 # list of macro include paths
-header-directories:
+header-paths:
   - source
 
 # OPTIONAL
@@ -65,7 +65,7 @@ libraries:
 
 # OPTIONAL
 # list of library search paths
-library-directories:
+library-paths:
   - library
 
 # OPTIONAL

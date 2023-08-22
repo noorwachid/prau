@@ -3,7 +3,7 @@
 #include "Project.h"
 #include "SourceParser.h"
 
-struct ProjectSource
+struct ProjectGraph
 {
 	struct Detail
 	{
@@ -17,9 +17,9 @@ struct ProjectSource
 namespace YAML
 {
 	template <>
-	struct convert<ProjectSource>
+	struct convert<ProjectGraph>
 	{
-		static Node encode(const ProjectSource& projectSource)
+		static Node encode(const ProjectGraph& projectSource)
 		{
 			Node node;
 
@@ -35,7 +35,7 @@ namespace YAML
 			return node;
 		}
 
-		static bool decode(const Node& node, ProjectSource& projectSource)
+		static bool decode(const Node& node, ProjectGraph& projectSource)
 		{
 			if (node.IsMap())
 			{
@@ -43,7 +43,7 @@ namespace YAML
 				{
 					if (subnode.second.IsMap())
 					{
-						ProjectSource::Detail& detail = projectSource.sources[subnode.first.as<string>()];
+						ProjectGraph::Detail& detail = projectSource.sources[subnode.first.as<string>()];
 						if (subnode.second["modified"] && subnode.second["modified"].IsScalar())
 							detail.modified = std::stoull(subnode.second["modified"].as<string>());
 						if (subnode.second["references"] && subnode.second["references"].IsSequence())
@@ -57,18 +57,20 @@ namespace YAML
 	};
 }
 
-class ProjectSourceLoader
+class ProjectGraphLoader
 {
 public:
-	static ProjectSource load(Project& project);
+	static ProjectGraph load(Project& project);
 
 private:
-	Project& project;
-	ProjectSource& projectSource;
-
-	ProjectSourceLoader(Project& project, ProjectSource& projectSource);
+	ProjectGraphLoader(Project& project, ProjectGraph& projectGraph);
 
 	void Add(const string& source);
 
 	void Print();
+
+private:
+	Project& _project;
+	ProjectGraph& _projectGraph;
+
 };

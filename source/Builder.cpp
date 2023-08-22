@@ -1,6 +1,6 @@
 #include "Builder.h"
 
-BuilderCache::BuilderCache(Project& project, ProjectSource& projectSource)
+BuilderCache::BuilderCache(Project& project, ProjectGraph& projectSource)
 	: _project(project), _projectSource(projectSource)
 {
 }
@@ -32,7 +32,7 @@ void BuilderCache::Validate()
 	}
 
 	YAML::Node cacheProjectSourceNode = YAML::LoadFile(file);
-	ProjectSource cacheProjectSource = cacheProjectSourceNode.as<ProjectSource>();
+	ProjectGraph cacheProjectSource = cacheProjectSourceNode.as<ProjectGraph>();
 
 	for (const auto [source, detail] : _projectSource.sources)
 	{
@@ -95,7 +95,7 @@ vector<string> BuilderCache::GetInvalidSources() const
 }
 
 Builder::Builder(Compiler& compiler, Project& project)
-	: _compiler(compiler), _project(project), _projectSource(ProjectSourceLoader::load(project)),
+	: _compiler(compiler), _project(project), _projectSource(ProjectGraphLoader::load(project)),
 	  _cache(project, _projectSource)
 {
 }
@@ -111,11 +111,11 @@ void Builder::Build()
 	}
 
 	string flags;
-	flags += " " + ComposeStandard();
+	flags += " " + _compiler.ComposeStandard(_project.standard);
 
 	for (const string& directory : _project.headerDirectories)
 	{
-		flags += " " + ComposeHeaderDirectory(directory);
+		flags += " " + _compiler.ComposeHeaderDirectory(directory);
 	}
 
 	vector<string> invalidSources = _cache.GetInvalidSources();
@@ -137,23 +137,24 @@ bool Builder::Compile(const string& flags, const vector<string>& sources)
 {
 	for (const string& source : sources)
 	{
-		string command = _compiler.program + flags + " " + ComposeObjectBuilder(source) + " " + source;
+		string objectFile = "build/object/" + _project.name + "/" + _compiler.ComposeObjectFile(source);
+		string objectCommand = _compiler.ComposeObject(objectFile) + " " + source;
+		string command = _compiler.GetProgram() + flags + " " + objectCommand;
 		string log;
-		log += "[";
-		log += Term::yellowFG;
-		log += _project.name;
-		log += Term::reset;
-		log += "] ";
-		log += Term::greenFG;
-		log += "compile ";
-		log += Term::reset;
-		log += fs::path(source).filename();
-		log += "\n";
+
+		log = log + "[" + Term::yellowFG + _project.name + Term::reset + "] ";
+		log = log + Term::greenFG + "compile " + Term::reset;
+		log = log + fs::path(source).filename().string() + "\n";
 
 		cout << log;
 
 		if (verbose)
 			cout << (command + "\n");
+
+		string objectDirectory = fs::path(objectFile).parent_path();
+
+		if (!fs::exists(objectDirectory))
+			fs::create_directories(objectDirectory);
 
 		if (system(command.c_str()) != 0)
 		{
@@ -170,25 +171,16 @@ bool Builder::Link(const string& flags)
 
 	for (const string& source : _project.sources)
 	{
-		objects += " build/object/" + _project.name + "/" + ComposeObjectFile(source);
-	}
-
-	for (const string& library : _project.libraries) 
-	{
-		for (const string& libraryDirectory: _project.libraryDirectories)
-		{
-			string libraryPath = libraryDirectory + "/" + ComposeLibraryFile(library);
-
-			if (fs::exists(libraryPath))
-			{
-				objects += " " + libraryPath;
-			}
-		}
+		objects += " build/object/" + _project.name + "/" + _compiler.ComposeObjectFile(source);
 	}
 
 	if (_project.type == "library")
 	{
-		string command = _compiler.program + flags + " " + ComposeLibraryBuilder(_project.name) + objects;
+		if (!fs::exists("build/library"))
+			fs::create_directories("build/library");
+
+		string libraryFile = "build/library/" + _compiler.ComposeLibraryFile(_project.name);
+		string command = _compiler.GetProgram() + flags + " " + _compiler.ComposeLibrary(libraryFile) + objects;
 		string log;
 		log += "[";
 		log += Term::yellowFG;
@@ -228,7 +220,11 @@ bool Builder::Link(const string& flags)
 
 	if (_project.type == "executable")
 	{
-		string command = _compiler.program + flags + " " + ComposeExecutableBuilder(_project.name) + objects;
+		if (!fs::exists("build/executable"))
+			fs::create_directories("build/executable");
+
+		string executableFile = "build/executable/" + _compiler.ComposeExecutableFile(_project.name);
+		string command = _compiler.GetProgram() + flags + " " + _compiler.ComposeExecutable(executableFile) + objects;
 		string log;
 		log += "[";
 		log += Term::yellowFG;
@@ -270,7 +266,7 @@ void Builder::Run()
 		Build();
 	}
 
-	string executablePath = "build/executable/" + ComposeExecutableFile(_project.name);
+	string executablePath = "build/executable/" + _compiler.ComposeExecutableFile(_project.name);
 	if (!fs::exists(executablePath))
 	{
 		cout << "no executable were found\n";
@@ -299,71 +295,3 @@ void Builder::Clean()
 	cout << "cleaned up\n";
 }
 
-string Builder::ComposeHeaderDirectory(const string& directory) const
-{
-	return Text::ReplaceAll(_compiler.directory.header, "<directory>", directory);
-}
-
-string Builder::ComposeLibraryDirectory(const string& directory) const
-{
-	return Text::ReplaceAll(_compiler.directory.library, "<directory>", directory);
-}
-
-string Builder::ComposeStandard() const
-{
-	return Text::ReplaceAll(_compiler.standard, "<standard>", _project.standard);
-}
-
-string Builder::ComposeObjectFile(const string& source) const
-{
-	return Text::ReplaceAll(_compiler.file.object, "<source>", source);
-}
-
-string Builder::ComposeLibraryFile(const string& name) const
-{
-	return Text::ReplaceAll(_compiler.file.library, "<name>", name);
-}
-
-string Builder::ComposeExecutableFile(const string& name) const
-{
-	return Text::ReplaceAll(_compiler.file.executable, "<name>", name);
-}
-
-string Builder::ComposeObjectBuilder(const string& source) const
-{
-	string file = "build/object/" + _project.name + "/" + ComposeObjectFile(source);
-	string directory = fs::path(file).parent_path();
-
-	if (!fs::exists(directory))
-	{
-		fs::create_directories(directory);
-	}
-
-	return Text::ReplaceAll(_compiler.builder.object, "<file>", file);
-}
-
-string Builder::ComposeLibraryBuilder(const string& name) const
-{
-	string directory = "build/library/";
-	string file = directory + ComposeLibraryFile(name);
-
-	if (!fs::exists(directory))
-	{
-		fs::create_directories(directory);
-	}
-
-	return Text::ReplaceAll(_compiler.builder.library, "<file>", file);
-}
-
-string Builder::ComposeExecutableBuilder(const string& name) const
-{
-	string directory = "build/executable/";
-	string file = directory + ComposeExecutableFile(_project.name);
-
-	if (!fs::exists(directory))
-	{
-		fs::create_directories(directory);
-	}
-
-	return Text::ReplaceAll(_compiler.builder.executable, "<file>", file);
-}

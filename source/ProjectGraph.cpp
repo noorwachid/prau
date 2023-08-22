@@ -1,15 +1,15 @@
 #include "ProjectGraph.h"
 
-ProjectSource ProjectSourceLoader::load(Project& project)
+ProjectGraph ProjectGraphLoader::load(Project& project)
 {
-	ProjectSource projectSource;
-	ProjectSourceLoader projectLoader(project, projectSource);
+	ProjectGraph projectSource;
+	ProjectGraphLoader projectLoader(project, projectSource);
 
 	return projectSource;
 }
 
-ProjectSourceLoader::ProjectSourceLoader(Project& project, ProjectSource& projectSource)
-	: project(project), projectSource(projectSource)
+ProjectGraphLoader::ProjectGraphLoader(Project& project, ProjectGraph& projectGraph)
+	: _project(project), _projectGraph(projectGraph)
 {
 	for (const string source : project.sources)
 	{
@@ -20,9 +20,9 @@ ProjectSourceLoader::ProjectSourceLoader(Project& project, ProjectSource& projec
 	}
 }
 
-void ProjectSourceLoader::Print()
+void ProjectGraphLoader::Print()
 {
-	for (const auto& [source, detail] : projectSource.sources)
+	for (const auto& [source, detail] : _projectGraph.sources)
 	{
 		cout << source << ":\n";
 		cout << "  modified: " << detail.modified << "\n";
@@ -37,14 +37,14 @@ void ProjectSourceLoader::Print()
 	}
 }
 
-void ProjectSourceLoader::Add(const string& source)
+void ProjectGraphLoader::Add(const string& source)
 {
-	if (projectSource.sources.count(source))
+	if (_projectGraph.sources.count(source))
 	{
 		return;
 	}
 
-	ProjectSource::Detail sourceDetail;
+	ProjectGraph::Detail sourceDetail;
 
 	chrono::time_point timepoint = fs::last_write_time(source);
 	sourceDetail.modified = chrono::duration_cast<chrono::milliseconds>(timepoint.time_since_epoch()).count();
@@ -56,7 +56,7 @@ void ProjectSourceLoader::Add(const string& source)
 
 	SourceParser sourceParser;
 	sourceParser.Parse(sourceContent);
-	projectSource.sources[source] = sourceDetail;
+	_projectGraph.sources[source] = sourceDetail;
 
 	string directory = fs::path(source).parent_path().string();
 	if (!directory.empty())
@@ -70,18 +70,18 @@ void ProjectSourceLoader::Add(const string& source)
 		if (fs::exists(sameDirectory))
 		{
 			Add(sameDirectory);
-			projectSource.sources[sameDirectory].references.push_back(source);
+			_projectGraph.sources[sameDirectory].references.push_back(source);
 			continue;
 		}
 
-		for (const string& directory : project.headerDirectories)
+		for (const string& directory : _project.headerDirectories)
 		{
 			string differentDirectory = directory + "/" + dependency;
 
 			if (fs::exists(differentDirectory))
 			{
 				Add(differentDirectory);
-				projectSource.sources[differentDirectory].references.push_back(source);
+				_projectGraph.sources[differentDirectory].references.push_back(source);
 				break;
 			}
 		}

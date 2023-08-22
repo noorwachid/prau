@@ -7,7 +7,7 @@
 class BuilderCache
 {
 public:
-	BuilderCache(Project& project, ProjectSource& projectSource);
+	BuilderCache(Project& project, ProjectGraph& projectSource);
 
 	void Invalidate();
 
@@ -27,7 +27,7 @@ private:
 private:
 	bool _valid = false;
 	Project& _project;
-	ProjectSource& _projectSource;
+	ProjectGraph& _projectSource;
 	unordered_set<string> _invalidSources;
 };
 
@@ -44,24 +44,6 @@ public:
 
 	void Clean();
 
-	string ComposeStandard() const;
-
-	string ComposeHeaderDirectory(const string& directory) const;
-
-	string ComposeLibraryDirectory(const string& directory) const;
-
-	string ComposeObjectFile(const string& file) const;
-
-	string ComposeLibraryFile(const string& file) const;
-
-	string ComposeExecutableFile(const string& file) const;
-
-	string ComposeObjectBuilder(const string& file) const;
-
-	string ComposeLibraryBuilder(const string& file) const;
-
-	string ComposeExecutableBuilder(const string& file) const;
-
 private:
 	bool Compile(const string& flags, const vector<string>& sources);
 
@@ -70,6 +52,6 @@ private:
 private:
 	Compiler& _compiler;
 	Project& _project;
-	ProjectSource _projectSource;
+	ProjectGraph _projectSource;
 	BuilderCache _cache;
 };

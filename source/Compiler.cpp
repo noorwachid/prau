@@ -1,24 +1,47 @@
 #include "Compiler.h"
 #include "Platform.h"
 
-vector<string> CompilerPath::Generate(const string& language, const string& name)
+string ClangCompiler::GetProgram()
 {
-	string file = name + ".prau";
-
-#ifdef PLATFORM_APPLE
-	return {
-		"/usr/local/share/prau/compiler/" + language + "/" + file,
-		"asset/compiler/" + language + "/" + file,
-	};
-#endif
-
-	return {};
+	return "clang++";
 }
 
-Compiler CompilerLoader::Load(const string& path)
+string ClangCompiler::ComposeStandard(const string& standard)
 {
-	YAML::Node node = YAML::LoadFile(path);
-	Compiler compiler = node.as<Compiler>();
+	return "-std=c++" + standard;
+}
 
-	return compiler;
+string ClangCompiler::ComposeHeaderDirectory(const string& directory)
+{
+	return "-I" + directory;
+}
+
+string ClangCompiler::ComposeObject(const string& objectFile)
+{
+	return "-o " + objectFile + " -c";
+}
+
+string ClangCompiler::ComposeObjectFile(const string& sourceFile)
+{
+	return sourceFile + ".o";
+}
+
+string ClangCompiler::ComposeLibrary(const string& libraryFile)
+{
+	return "-o " + libraryFile + " -dynamiclib";
+}
+
+string ClangCompiler::ComposeLibraryFile(const string& name)
+{
+	return "lib" + name + ".dylib";
+}
+
+string ClangCompiler::ComposeExecutable(const string& executableFile)
+{
+	return "-o " + executableFile;
+}
+
+string ClangCompiler::ComposeExecutableFile(const string& name)
+{
+	return name;
 }

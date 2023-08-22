@@ -1,24 +1,6 @@
 #include "Starter.h"
 #include "Builder.h"
 
-string GetCompilerPath()
-{
-	string language = "cpp";
-	string name = "clang";
-	vector<string> paths = CompilerPath::Generate(language, name);
-
-	for (const string& path : paths)
-	{
-		if (fs::exists(path))
-		{
-			return path;
-		}
-	}
-
-	cout << "compiler file for '" << name << "' were not found\n";
-	return "";
-}
-
 string GetProjectPath()
 {
 	string projectPath = ProjectPath::Generate(".");
@@ -32,21 +14,7 @@ string GetProjectPath()
 	return projectPath;
 }
 
-void InformCompiler()
-{
-	string compilerPath = GetCompilerPath();
-	if (compilerPath.empty())
-	{
-		return;
-	}
-
-	Compiler compiler = CompilerLoader::Load(compilerPath);
-	YAML::Node node;
-	node = compiler;
-	std::cout << node << "\n";
-}
-
-void InformProject()
+void InfoProject()
 {
 	string projectPath = GetProjectPath();
 	if (projectPath.empty())
@@ -60,7 +28,7 @@ void InformProject()
 	cout << projectNode << "\n";
 }
 
-void InformProjectDependency()
+void InfoProjectGraph()
 {
 	string projectPath = GetProjectPath();
 	if (projectPath.empty())
@@ -69,33 +37,7 @@ void InformProjectDependency()
 	}
 
 	Project project = ProjectLoader::Load(projectPath);
-	YAML::Node projectNode;
-	projectNode.push_back(project);
-
-	for (const string& dependency : project.dependencies) 
-	{
-		string dependencyProjectPath = ProjectPath::Generate(dependency);
-
-		if (fs::exists(dependencyProjectPath))
-		{
-			Project dependencyProject = ProjectLoader::Load(dependencyProjectPath);
-			projectNode.push_back(dependencyProject);
-		}
-	}
-
-	cout << projectNode << "\n";
-}
-
-void InformProjectSource()
-{
-	string projectPath = GetProjectPath();
-	if (projectPath.empty())
-	{
-		return;
-	}
-
-	Project project = ProjectLoader::Load(projectPath);
-	ProjectSource projectSource = ProjectSourceLoader::load(project);
+	ProjectGraph projectSource = ProjectGraphLoader::load(project);
 	YAML::Node projectSourceNode;
 	projectSourceNode = projectSource;
 
@@ -104,93 +46,43 @@ void InformProjectSource()
 
 void Build()
 {
-	string compilerPath = GetCompilerPath();
-	if (compilerPath.empty())
-	{
-		return;
-	}
-
 	string projectPath = GetProjectPath();
 	if (projectPath.empty())
 	{
 		return;
 	}
 
-	Compiler compiler = CompilerLoader::Load(compilerPath);
+	Compiler* compiler = new ClangCompiler();
 	Project project = ProjectLoader::Load(projectPath);
-
-	for (const string& dependency : project.dependencies) 
-	{
-		string dependencyProjectPath = ProjectPath::Generate(dependency);
-
-		if (fs::exists(dependencyProjectPath))
-		{
-			Project dependencyProject = ProjectLoader::Load(dependencyProjectPath);
-			project.libraries.push_back(dependencyProject.name);
-
-			for (size_t i = 0; i < dependencyProject.headerDirectories.size(); ++i) 
-			{
-				const string& headerDirectory = dependencyProject.headerDirectories[i];
-				project.headerDirectories.push_back(dependency + "/" + headerDirectory);
-				dependencyProject.headerDirectories[i] = dependency + "/" + headerDirectory;
-			}
-
-			for (size_t i = 0; i < dependencyProject.sources.size(); ++i) 
-			{
-				const string& source = dependencyProject.sources[i];
-				dependencyProject.sources[i] = dependency + "/" + source;
-			}
-
-			Builder builder(compiler, dependencyProject);
-			builder.Build();
-
-			project.libraries.push_back(dependencyProject.name);
-		}
-	}
-
-	project.libraryDirectories.push_back("build/library");
-
-	Builder builder(compiler, project);
+	Builder builder(*compiler, project);
 	builder.Build();
 }
 
 void Clean()
 {
-	string compilerPath = GetCompilerPath();
-	if (compilerPath.empty())
-	{
-		return;
-	}
-
 	string projectPath = GetProjectPath();
 	if (projectPath.empty())
 	{
 		return;
 	}
 
-	Compiler compiler = CompilerLoader::Load(compilerPath);
+	Compiler* compiler = new ClangCompiler();
 	Project project = ProjectLoader::Load(projectPath);
-	Builder builder(compiler, project);
+	Builder builder(*compiler, project);
 	builder.Clean();
 }
 
 void Run()
 {
-	string compilerPath = GetCompilerPath();
-	if (compilerPath.empty())
-	{
-		return;
-	}
-
 	string projectPath = GetProjectPath();
 	if (projectPath.empty())
 	{
 		return;
 	}
 
-	Compiler compiler = CompilerLoader::Load(compilerPath);
+	Compiler* compiler = new ClangCompiler();
 	Project project = ProjectLoader::Load(projectPath);
-	Builder builder(compiler, project);
+	Builder builder(*compiler, project);
 
 	builder.Run();
 }
@@ -219,28 +111,15 @@ int main(int argc, char** argv)
 
 	try
 	{
-		if (command == "inform-project")
+		if (command == "info-project")
 		{
-			InformProject();
+			InfoProject();
 			return 0;
 		}
 
-		if (command == "inform-project-dependency")
+		if (command == "info-project-graph")
 		{
-			InformProjectDependency();
-			return 0;
-		}
-
-
-		if (command == "inform-project-source")
-		{
-			InformProjectSource();
-			return 0;
-		}
-
-		if (command == "inform-compiler")
-		{
-			InformCompiler();
+			InfoProjectGraph();
 			return 0;
 		}
 
