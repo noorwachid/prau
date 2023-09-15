@@ -1,5 +1,5 @@
-#include "Compiler.h"
-#include "Platform.h"
+#include "compiler.h"
+#include "platform.h"
 
 string ClangCompiler::getProgram() {
 	return "clang++";

@@ -1,4 +1,4 @@
-#include "Starter.h"
+#include "starter.h"
 
 void Starter::generate(const string& directory) {
 	string sourceDirectory = directory + "/source";

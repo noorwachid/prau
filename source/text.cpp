@@ -1,4 +1,4 @@
-#include "Text.h"
+#include "text.h"
 
 namespace Text {
 	bool isSymbolPrefix(char c) {

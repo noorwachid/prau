@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.h"
-#include "Project.h"
+#include "common.h"
+#include "project.h"
 
 class Starter {
 public:

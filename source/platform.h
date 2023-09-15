@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.h"
+#include "common.h"
 
 #ifdef _WIN64
 #define PLATFORM_WINDOWS

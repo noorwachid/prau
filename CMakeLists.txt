@@ -5,14 +5,14 @@ set(CMAKE_CXX_STANDARD 17)
 project(prau)
 
 add_executable(prau 
-	source/Text.cpp
-	source/Platform.cpp
-	source/Project.cpp
-	source/ProjectGraph.cpp
-	source/Compiler.cpp
-	source/Builder.cpp
-	source/Starter.cpp
-	source/EntryPoint.cpp
+	source/text.cpp
+	source/platform.cpp
+	source/project.cpp
+	source/projectgraph.cpp
+	source/compiler.cpp
+	source/builder.cpp
+	source/starter.cpp
+	source/main.cpp
 )
 
 add_subdirectory(dependency/yaml)

@@ -1,5 +1,5 @@
-#include "Builder.h"
-#include "Starter.h"
+#include "builder.h"
+#include "starter.h"
 
 string getProjectPath() {
 	string projectPath = ProjectPath::generate(".");

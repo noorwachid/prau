@@ -1,4 +1,4 @@
-#include "ProjectGraph.h"
+#include "projectgraph.h"
 
 ProjectGraph ProjectGraphLoader::load(Project& project) {
 	ProjectGraph projectSource;

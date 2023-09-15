@@ -1,5 +1,5 @@
-#include "Project.h"
-#include "Platform.h"
+#include "project.h"
+#include "platform.h"
 
 string ProjectPath::generate(const string& directory) {
 	string file = "project.prau";

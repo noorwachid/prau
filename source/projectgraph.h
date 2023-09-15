@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Project.h"
-#include "SourceParser.h"
+#include "project.h"
+#include "sourceparser.h"
 
 struct ProjectGraph {
 	struct Detail {

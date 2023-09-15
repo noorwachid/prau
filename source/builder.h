@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Compiler.h"
-#include "ProjectGraph.h"
-#include "Term.h"
+#include "compiler.h"
+#include "projectgraph.h"
+#include "term.h"
 
 class BuilderCache {
 public:

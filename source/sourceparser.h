@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SourceLexer.h"
+#include "sourcelexer.h"
 
 class SourceParser {
 public:
@@ -8,7 +8,7 @@ public:
 		_lexer.tokenize(content);
 		_index = 0;
 
-		Parse();
+		parse();
 	}
 
 	const vector<string>& getDependencies() const {

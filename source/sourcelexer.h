@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SourceToken.h"
-#include "Text.h"
+#include "sourcetoken.h"
+#include "text.h"
 
 class SourceLexer {
 public:
