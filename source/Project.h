@@ -3,8 +3,7 @@
 #include "Common.h"
 #include "yaml-cpp/yaml.h"
 
-struct Project
-{
+struct Project {
 	string name;
 	string description;
 	string type;
@@ -25,25 +24,20 @@ struct Project
 	vector<string> dependencies;
 };
 
-struct ProjectPath
-{
-	static string Generate(const string& directory);
+struct ProjectPath {
+	static string generate(const string& directory);
 };
 
-struct ProjectLoader
-{
-	static Project Load(const string& path);
+struct ProjectLoader {
+	static Project load(const string& path);
 
-	static bool Check(const Project& project);
+	static bool check(const Project& project);
 };
 
-namespace YAML
-{
+namespace YAML {
 	template <>
-	struct convert<Project>
-	{
-		static Node encode(const Project& project)
-		{
+	struct convert<Project> {
+		static Node encode(const Project& project) {
 			Node node;
 			if (!project.name.empty())
 				node["name"] = project.name;
@@ -82,8 +76,7 @@ namespace YAML
 			return node;
 		}
 
-		static bool decode(const Node& node, Project& project)
-		{
+		static bool decode(const Node& node, Project& project) {
 			if (node["name"] && node["name"].IsScalar())
 				project.name = node["name"].as<string>();
 			if (node["description"] && node["description"].IsScalar())

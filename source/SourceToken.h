@@ -2,14 +2,12 @@
 
 #include "Common.h"
 
-enum struct TokenType
-{
+enum struct TokenType {
 	macroInclude,
 	path,
 };
 
-struct Token
-{
+struct Token {
 	TokenType type;
 	string value;
 };

@@ -16,7 +16,6 @@
 #define PLATFORM_WEB
 #endif
 
-namespace Platform
-{
-	string Get();
+namespace Platform {
+	string get();
 }

@@ -2,55 +2,43 @@
 
 #include "SourceLexer.h"
 
-class SourceParser
-{
+class SourceParser {
 public:
-	void Parse(const std::string& content)
-	{
-		_lexer.Tokenize(content);
+	void parse(const std::string& content) {
+		_lexer.tokenize(content);
 		_index = 0;
 
 		Parse();
 	}
 
-	const vector<string>& GetDependencies() const
-	{
+	const vector<string>& getDependencies() const {
 		return _dependencies;
 	}
 
 private:
-	bool Check(size_t offset)
-	{
-		return _index + offset < _lexer.GetTokenSize();
+	bool check(size_t offset) {
+		return _index + offset < _lexer.getTokenSize();
 	}
 
-	bool Is(size_t offset, TokenType type)
-	{
-		return _lexer.GetToken(_index + offset).type == type;
+	bool is(size_t offset, TokenType type) {
+		return _lexer.getToken(_index + offset).type == type;
 	}
 
-	const Token& Get(size_t offset)
-	{
-		return _lexer.GetToken(_index + offset);
+	const Token& get(size_t offset) {
+		return _lexer.getToken(_index + offset);
 	}
 
-	void Advance(size_t offset)
-	{
+	void advance(size_t offset) {
 		_index += offset;
 	}
 
-	void Parse()
-	{
-		while (Check(0))
-		{
-			if (Check(1) && Is(0, TokenType::macroInclude) && Is(1, TokenType::path))
-			{
-				_dependencies.push_back(Get(1).value);
-				Advance(2);
-			}
-			else
-			{
-				Advance(1);
+	void parse() {
+		while (check(0)) {
+			if (check(1) && is(0, TokenType::macroInclude) && is(1, TokenType::path)) {
+				_dependencies.push_back(get(1).value);
+				advance(2);
+			} else {
+				advance(1);
 			}
 		}
 	}

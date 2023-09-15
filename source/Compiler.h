@@ -3,46 +3,44 @@
 #include "Common.h"
 #include "yaml-cpp/yaml.h"
 
-class Compiler
-{
+class Compiler {
 public:
-	virtual string GetProgram() = 0;
+	virtual string getProgram() = 0;
 
-	virtual string ComposeStandard(const string& standard) = 0;
+	virtual string composeStandard(const string& standard) = 0;
 
-	virtual string ComposeHeaderDirectory(const string& directory) = 0;
+	virtual string composeHeaderDirectory(const string& directory) = 0;
 
-	virtual string ComposeObject(const string& objectFile) = 0;
+	virtual string composeObject(const string& objectFile) = 0;
 
-	virtual string ComposeObjectFile(const string& sourceFile) = 0;
+	virtual string composeObjectFile(const string& sourceFile) = 0;
 
-	virtual string ComposeLibrary(const string& libraryFile) = 0;
+	virtual string composeLibrary(const string& libraryFile) = 0;
 
-	virtual string ComposeLibraryFile(const string& name) = 0;
+	virtual string composeLibraryFile(const string& name) = 0;
 
-	virtual string ComposeExecutable(const string& executableFile) = 0;
+	virtual string composeExecutable(const string& executableFile) = 0;
 
-	virtual string ComposeExecutableFile(const string& name) = 0;
+	virtual string composeExecutableFile(const string& name) = 0;
 };
 
-class ClangCompiler : public Compiler
-{
+class ClangCompiler : public Compiler {
 public:
-	virtual string GetProgram() override;
+	virtual string getProgram() override;
 
-	virtual string ComposeStandard(const string& standard) override;
+	virtual string composeStandard(const string& standard) override;
 
-	virtual string ComposeHeaderDirectory(const string& directory) override;
+	virtual string composeHeaderDirectory(const string& directory) override;
 
-	virtual string ComposeObject(const string& objectFile) override;
+	virtual string composeObject(const string& objectFile) override;
 
-	virtual string ComposeObjectFile(const string& sourceFile) override;
+	virtual string composeObjectFile(const string& sourceFile) override;
 
-	virtual string ComposeLibrary(const string& libraryFile) override;
+	virtual string composeLibrary(const string& libraryFile) override;
 
-	virtual string ComposeLibraryFile(const string& name) override;
+	virtual string composeLibraryFile(const string& name) override;
 
-	virtual string ComposeExecutable(const string& executableFile) override;
+	virtual string composeExecutable(const string& executableFile) override;
 
-	virtual string ComposeExecutableFile(const string& name) override;
+	virtual string composeExecutableFile(const string& name) override;
 };

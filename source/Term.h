@@ -1,7 +1,6 @@
 #pragma once
 
-namespace Term
-{
+namespace Term {
 	constexpr const char* reset = "\x1B[0m";
 
 	constexpr const char* redFG = "\x1B[31m";

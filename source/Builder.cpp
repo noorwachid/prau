@@ -1,32 +1,28 @@
 #include "Builder.h"
+#include <unistd.h>
 
 BuilderCache::BuilderCache(Project& project, ProjectGraph& projectSource)
-	: _project(project), _projectSource(projectSource)
-{
+	: _project(project), _projectSource(projectSource) {
 }
 
-void BuilderCache::Invalidate()
-{
-	ofstream fileStream(GetFile());
+void BuilderCache::invalidate() {
+	ofstream fileStream(getFile());
 	YAML::Node node;
 	node = _projectSource;
 	fileStream << node;
 }
 
-void BuilderCache::Validate()
-{
+void BuilderCache::validate() {
 	_valid = true;
 
-	string file = GetFile();
+	string file = getFile();
 	string directory = "build/cache";
 
-	if (!fs::exists(directory))
-	{
+	if (!fs::exists(directory)) {
 		fs::create_directories(directory);
 	}
 
-	if (!fs::exists(file))
-	{
+	if (!fs::exists(file)) {
 		_valid = false;
 		return;
 	}
@@ -34,153 +30,133 @@ void BuilderCache::Validate()
 	YAML::Node cacheProjectSourceNode = YAML::LoadFile(file);
 	ProjectGraph cacheProjectSource = cacheProjectSourceNode.as<ProjectGraph>();
 
-	for (const auto [source, detail] : _projectSource.sources)
-	{
-		if (cacheProjectSource.sources.count(source))
-		{
-			if (cacheProjectSource.sources[source].modified != detail.modified)
-			{
-				AddInvalidSource(source);
+	for (const auto [source, detail] : _projectSource.sources) {
+		if (cacheProjectSource.sources.count(source)) {
+			if (cacheProjectSource.sources[source].modified != detail.modified) {
+				addInvalidSource(source);
 			}
-		}
-		else
-		{
-			AddInvalidSource(source);
+		} else {
+			addInvalidSource(source);
 		}
 	}
 
-	if (!_invalidSources.empty())
-	{
+	if (!_invalidSources.empty()) {
 		_valid = false;
 	}
 }
 
-bool BuilderCache::IsValid() const
-{
+bool BuilderCache::isValid() const {
 	return _valid;
 }
 
-void BuilderCache::AddInvalidSource(const string& source)
-{
-	if (_projectSource.sources.count(source))
-	{
-		for (const string& reference : _projectSource.sources[source].references)
-		{
-			AddInvalidSource(reference);
+void BuilderCache::addInvalidSource(const string& source) {
+	if (_projectSource.sources.count(source)) {
+		for (const string& reference : _projectSource.sources[source].references) {
+			addInvalidSource(reference);
 		}
 	}
 
-	if (IsSourceFile(source) && _invalidSources.count(source) == 0)
-	{
+	if (isSourceFile(source) && _invalidSources.count(source) == 0) {
 		_invalidSources.insert(source);
 		return;
 	}
 }
 
-bool BuilderCache::IsSourceFile(const string& source) const
-{
+bool BuilderCache::isSourceFile(const string& source) const {
 	string extension = fs::path(source).extension().string();
 
 	return extension == ".cpp";
 }
 
-string BuilderCache::GetFile() const
-{
+string BuilderCache::getFile() const {
 	return "build/cache/" + _project.name + ".prau";
 }
 
-vector<string> BuilderCache::GetInvalidSources() const
-{
+vector<string> BuilderCache::getInvalidSources() const {
 	return vector<string>(_invalidSources.begin(), _invalidSources.end());
 }
 
 Builder::Builder(Compiler& compiler, Project& project)
 	: _compiler(compiler), _project(project), _projectSource(ProjectGraphLoader::load(project)),
-	  _cache(project, _projectSource)
-{
+	  _cache(project, _projectSource) {
 }
 
-void Builder::Build()
-{
-	_cache.Validate();
+void Builder::build() {
+	_cache.validate();
 
-	if (_cache.IsValid())
-	{
+	if (_cache.isValid()) {
 		cout << "no work to do\n";
 		return;
 	}
 
 	string flags;
-	flags += " " + _compiler.ComposeStandard(_project.standard);
+	flags += " " + _compiler.composeStandard(_project.standard);
 
-	for (const string& directory : _project.headerDirectories)
-	{
-		flags += " " + _compiler.ComposeHeaderDirectory(directory);
+	for (const string& directory : _project.headerDirectories) {
+		flags += " " + _compiler.composeHeaderDirectory(directory);
 	}
 
-	vector<string> invalidSources = _cache.GetInvalidSources();
+	vector<string> invalidSources = _cache.getInvalidSources();
 
-	if (!Compile(flags, !invalidSources.empty() ? invalidSources : _project.sources))
-	{
+	if (!compile(flags, !invalidSources.empty() ? invalidSources : _project.sources)) {
 		return;
 	}
 
-	if (!Link(flags))
-	{
+	if (!link(flags)) {
 		return;
 	}
 
-	_cache.Invalidate();
+	_cache.invalidate();
 }
 
-bool Builder::Compile(const string& flags, const vector<string>& sources)
-{
-	for (const string& source : sources)
-	{
-		string objectFile = "build/object/" + _project.name + "/" + _compiler.ComposeObjectFile(source);
-		string objectCommand = _compiler.ComposeObject(objectFile) + " " + source;
-		string command = _compiler.GetProgram() + flags + " " + objectCommand;
+bool Builder::compile(const string& flags, const vector<string>& sources) {
+	for (const string& source : sources) {
+		string objectFile = "build/object/" + _project.name + "/" + _compiler.composeObjectFile(source);
+		string objectCommand = _compiler.composeObject(objectFile) + " " + source;
+		string command = _compiler.getProgram() + flags + " " + objectCommand;
 		string log;
 
 		log = log + "[" + Term::yellowFG + _project.name + Term::reset + "] ";
 		log = log + Term::greenFG + "compile " + Term::reset;
 		log = log + fs::path(source).filename().string() + "\n";
 
-		cout << log;
-
-		if (verbose)
-			cout << (command + "\n");
-
 		string objectDirectory = fs::path(objectFile).parent_path();
 
 		if (!fs::exists(objectDirectory))
 			fs::create_directories(objectDirectory);
 
-		if (system(command.c_str()) != 0)
-		{
-			return false;
+		pid_t pid = fork();
+		if (pid == 0) {
+			system(command.c_str());
+
+			cout << log;
+
+			if (verbose)
+				cout << (command + "\n");
+
+			exit(0);
 		}
 	}
+
+	while (wait(NULL) > 0)
+		;
 
 	return true;
 }
 
-bool Builder::Link(const string& flags)
-{
+bool Builder::link(const string& flags) {
 	string objects;
 
-	for (const string& source : _project.sources)
-	{
-		objects += " build/object/" + _project.name + "/" + _compiler.ComposeObjectFile(source);
+	for (const string& source : _project.sources) {
+		objects += " build/object/" + _project.name + "/" + _compiler.composeObjectFile(source);
 	}
 
-	if (_project.type == "library")
-	{
+	if (_project.type == "library") {
 		if (!fs::exists("build/library"))
 			fs::create_directories("build/library");
 
-		string libraryFile = "build/library/" + _compiler.ComposeLibraryFile(_project.name);
-		string command = _compiler.GetProgram() + flags + " " + _compiler.ComposeLibrary(libraryFile) + objects;
+		string libraryFile = "build/library/" + _compiler.composeLibraryFile(_project.name);
+		string command = _compiler.getProgram() + flags + " " + _compiler.composeLibrary(libraryFile) + objects;
 		string log;
 		log += "[";
 		log += Term::yellowFG;
@@ -199,8 +175,7 @@ bool Builder::Link(const string& flags)
 		if (verbose)
 			cout << (command + "\n");
 
-		if (system(command.c_str()) != 0)
-		{
+		if (system(command.c_str()) != 0) {
 			string log;
 			log += "[";
 			log += Term::yellowFG;
@@ -218,13 +193,12 @@ bool Builder::Link(const string& flags)
 		}
 	}
 
-	if (_project.type == "executable")
-	{
+	if (_project.type == "executable") {
 		if (!fs::exists("build/executable"))
 			fs::create_directories("build/executable");
 
-		string executableFile = "build/executable/" + _compiler.ComposeExecutableFile(_project.name);
-		string command = _compiler.GetProgram() + flags + " " + _compiler.ComposeExecutable(executableFile) + objects;
+		string executableFile = "build/executable/" + _compiler.composeExecutableFile(_project.name);
+		string command = _compiler.getProgram() + flags + " " + _compiler.composeExecutable(executableFile) + objects;
 		string log;
 		log += "[";
 		log += Term::yellowFG;
@@ -243,8 +217,7 @@ bool Builder::Link(const string& flags)
 		if (verbose)
 			cout << (command + "\n");
 
-		if (system(command.c_str()) != 0)
-		{
+		if (system(command.c_str()) != 0) {
 			return false;
 		}
 	}
@@ -252,23 +225,19 @@ bool Builder::Link(const string& flags)
 	return true;
 }
 
-void Builder::Run()
-{
-	if (_project.type != "executable")
-	{
+void Builder::run() {
+	if (_project.type != "executable") {
 		cout << "the project's type is not an executable\n";
 		return;
 	}
 
-	_cache.Validate();
-	if (!_cache.IsValid())
-	{
-		Build();
+	_cache.validate();
+	if (!_cache.isValid()) {
+		build();
 	}
 
-	string executablePath = "build/executable/" + _compiler.ComposeExecutableFile(_project.name);
-	if (!fs::exists(executablePath))
-	{
+	string executablePath = "build/executable/" + _compiler.composeExecutableFile(_project.name);
+	if (!fs::exists(executablePath)) {
 		cout << "no executable were found\n";
 		return;
 	}
@@ -277,16 +246,13 @@ void Builder::Run()
 	return;
 }
 
-void Builder::Clean()
-{
-	if (!fs::exists(ProjectPath::Generate(".")))
-	{
+void Builder::clean() {
+	if (!fs::exists(ProjectPath::generate("."))) {
 		cout << "whoa there's no project file in this directory, careful dude\n";
 		return;
 	}
 
-	if (!fs::exists("build"))
-	{
+	if (!fs::exists("build")) {
 		cout << "already clean\n";
 		return;
 	}
@@ -294,4 +260,3 @@ void Builder::Clean()
 	fs::remove_all("build");
 	cout << "cleaned up\n";
 }
-

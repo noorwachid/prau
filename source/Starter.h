@@ -3,8 +3,7 @@
 #include "Common.h"
 #include "Project.h"
 
-class Starter
-{
+class Starter {
 public:
-	void Generate(const string& directory);
+	void generate(const string& directory);
 };

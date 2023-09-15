@@ -4,25 +4,24 @@
 #include "ProjectGraph.h"
 #include "Term.h"
 
-class BuilderCache
-{
+class BuilderCache {
 public:
 	BuilderCache(Project& project, ProjectGraph& projectSource);
 
-	void Invalidate();
+	void invalidate();
 
-	void Validate();
+	void validate();
 
-	bool IsValid() const;
+	bool isValid() const;
 
-	vector<string> GetInvalidSources() const;
+	vector<string> getInvalidSources() const;
 
 private:
-	bool IsSourceFile(const string& source) const;
+	bool isSourceFile(const string& source) const;
 
-	string GetFile() const;
+	string getFile() const;
 
-	void AddInvalidSource(const string& source);
+	void addInvalidSource(const string& source);
 
 private:
 	bool _valid = false;
@@ -31,23 +30,22 @@ private:
 	unordered_set<string> _invalidSources;
 };
 
-class Builder
-{
+class Builder {
 public:
 	bool verbose = true;
 
 	Builder(Compiler& compiler, Project& project);
 
-	void Build();
+	void build();
 
-	void Run();
+	void run();
 
-	void Clean();
+	void clean();
 
 private:
-	bool Compile(const string& flags, const vector<string>& sources);
+	bool compile(const string& flags, const vector<string>& sources);
 
-	bool Link(const string& flags);
+	bool link(const string& flags);
 
 private:
 	Compiler& _compiler;

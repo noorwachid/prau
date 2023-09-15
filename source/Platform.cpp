@@ -1,9 +1,7 @@
 #include "Platform.h"
 
-namespace Platform
-{
-	string Get()
-	{
+namespace Platform {
+	string get() {
 #ifdef _WIN64
 		return "windows";
 #elif _WIN32

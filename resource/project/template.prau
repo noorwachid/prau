@@ -70,11 +70,11 @@ library-paths:
 
 # OPTIONAL
 # use * for glob entire directory
-# list of asset files
+# list of resource files
 # in linux will be copied to /usr/local/share
-assets:
-  - asset/fonts/monospace.ttf
-  - asset/configs/*
+resources:
+  - resource/fonts/monospace.ttf
+  - resource/configs/*
 
 # OPTIONAL
 # list of dependency projects

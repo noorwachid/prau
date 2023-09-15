@@ -1,9 +1,8 @@
 #include "Starter.h"
 
-void Starter::Generate(const string& directory)
-{
+void Starter::generate(const string& directory) {
 	string sourceDirectory = directory + "/source";
-	string projectPath = ProjectPath::Generate(directory);
+	string projectPath = ProjectPath::generate(directory);
 	string mainPath = sourceDirectory + "/main.cpp";
 
 	Project project;
@@ -17,8 +16,7 @@ void Starter::Generate(const string& directory)
 	YAML::Node node;
 	node = project;
 
-	if (!fs::exists(sourceDirectory))
-	{
+	if (!fs::exists(sourceDirectory)) {
 		fs::create_directories(sourceDirectory);
 	}
 

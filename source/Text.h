@@ -2,25 +2,24 @@
 
 #include "Common.h"
 
-namespace Text
-{
-	bool IsSymbolPrefix(char c);
+namespace Text {
+	bool isSymbolPrefix(char c);
 
-	bool IsSymbol(char c);
+	bool isSymbol(char c);
 
-	bool IsWhitespace(char c);
+	bool isWhitespace(char c);
 
-	bool IsLowerCase(char c);
+	bool isLowerCase(char c);
 
-	bool IsUpperCase(char c);
+	bool isUpperCase(char c);
 
-	bool IsAlphabetic(char c);
+	bool isAlphabetic(char c);
 
-	bool IsIntegral(char c);
+	bool isIntegral(char c);
 
-	bool IsFloatingPoint(char c);
+	bool isFloatingPoint(char c);
 
-	string ToSymbol(const string& text);
+	string toSymbol(const string& text);
 
-	string ReplaceAll(const string& original, const string& from, const string& to);
+	string replaceAll(const string& original, const string& from, const string& to);
 }
