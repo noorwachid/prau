@@ -1,4 +1,5 @@
 #include "builder.h"
+#include "platform.h"
 #include "starter.h"
 
 string getProjectPath() {
@@ -38,7 +39,7 @@ void infoProjectGraph() {
 	cout << projectSourceNode << "\n";
 }
 
-void build() {
+void build(const string& mode, bool verbose) {
 	string projectPath = getProjectPath();
 	if (projectPath.empty()) {
 		return;
@@ -47,6 +48,8 @@ void build() {
 	Compiler* compiler = new ClangCompiler();
 	Project project = ProjectLoader::load(projectPath);
 	Builder builder(*compiler, project);
+	builder.setMode(mode);
+	builder.setVerbose(verbose);
 	builder.build();
 }
 
@@ -62,7 +65,7 @@ void clean() {
 	builder.clean();
 }
 
-void run(const vector<string>& arguments) {
+void run(const string& mode, bool verbose, const vector<string>& arguments) {
 	string projectPath = getProjectPath();
 	if (projectPath.empty()) {
 		return;
@@ -71,7 +74,8 @@ void run(const vector<string>& arguments) {
 	Compiler* compiler = new ClangCompiler();
 	Project project = ProjectLoader::load(projectPath);
 	Builder builder(*compiler, project);
-
+	builder.setMode(mode);
+	builder.setVerbose(verbose);
 	builder.run(arguments);
 }
 
@@ -92,6 +96,37 @@ int main(int argc, char** argv) {
 	}
 
 	string command = argv[1];
+	string mode = "release";
+	string platform = Platform::get();
+	bool verbose = false;
+
+	vector<string> forwardedArguments;
+
+	for (int i = 2; i < argc; ++i) {
+		string argument = argv[i];
+		if (argument.size() > 1 && argument[0] == '-' && argument[1] == '-') {
+			if (argument.size() == 2) {
+				for (int j = i + 1; j < argc; ++j) {
+					forwardedArguments.push_back(argv[j]);
+				}
+				break;
+			}
+
+			if (argument == "--mode" && i + 1 < argc) {
+				mode = argv[i + 1];
+				++i;
+			}
+
+			if (argument == "--platform" && i + 1 < argc) {
+				platform = argv[i + 1];
+				++i;
+			}
+
+			if (argument == "--verbose") {
+				verbose = true;
+			}
+		}
+	}
 
 	try {
 		if (command == "info-project") {
@@ -105,16 +140,12 @@ int main(int argc, char** argv) {
 		}
 
 		if (command == "build") {
-			build();
+			build(mode, verbose);
 			return 0;
 		}
 
 		if (command == "run") {
-			vector<string> arguments;
-			for (int i = 2; i < argc; ++i) {
-				arguments.push_back(argv[i]);
-			}
-			run(arguments);
+			run(mode, verbose, forwardedArguments);
 			return 0;
 		}
 

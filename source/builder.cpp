@@ -81,6 +81,14 @@ Builder::Builder(Compiler& compiler, Project& project)
 	  _cache(project, _projectGraph) {
 }
 
+void Builder::setVerbose(bool verbose) {
+	_verbose = verbose;
+}
+
+void Builder::setMode(const string& mode) {
+	_mode = mode;
+}
+
 void Builder::build() {
 	if (!_project.dependencies.empty()) {
 		for (const string& dependency: _project.dependencies) {
@@ -102,6 +110,8 @@ void Builder::build() {
 			}
 
 			Builder builder(_compiler, subproject);
+			builder.setMode(_mode);
+			builder.setVerbose(_verbose);
 			builder.build();
 			_project.libraries.push_back(subproject.name);
 		}
@@ -139,7 +149,7 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 	for (const string& source : sources) {
 		string objectFile = "build/object/" + _project.name + "/" + _compiler.composeObjectFile(source);
 		string objectCommand = _compiler.composeObject(objectFile) + " " + source;
-		string command = _compiler.getProgram() + flags + " " + objectCommand;
+		string command = _compiler.getProgram() + flags + " " + _compiler.composeMode(_mode) + " " + objectCommand;
 		string log;
 
 		log = log + "[" + Term::yellowFG + _project.name + Term::reset + "] ";
@@ -152,11 +162,14 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 			fs::create_directories(objectDirectory);
 
 		pid_t pid = fork();
+
 		if (pid == 0) {
 			cout << log;
-			int result = system(command.c_str());
-			if (result != 0)
+
+			if (_verbose)
 				cout << (command + "\n");
+
+			int result = system(command.c_str());
 
 			exit(0);
 		}
@@ -200,8 +213,10 @@ bool Builder::link(const string& flags) {
 
 		cout << log;
 
-		if (system(command.c_str()) != 0) {
+		if (_verbose)
 			cout << (command + "\n");
+
+		if (system(command.c_str()) != 0) {
 			return false;
 		}
 	}
@@ -227,8 +242,10 @@ bool Builder::link(const string& flags) {
 
 		cout << log;
 
-		if (system(command.c_str()) != 0) {
+		if (_verbose)
 			cout << (command + "\n");
+
+		if (system(command.c_str()) != 0) {
 			return false;
 		}
 	}

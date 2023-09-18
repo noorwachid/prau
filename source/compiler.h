@@ -22,6 +22,8 @@ public:
 	virtual string composeExecutable(const string& executableFile) = 0;
 
 	virtual string composeExecutableFile(const string& name) = 0;
+
+	virtual string composeMode(const string& mode) = 0;
 };
 
 class ClangCompiler : public Compiler {
@@ -43,4 +45,6 @@ public:
 	virtual string composeExecutable(const string& executableFile) override;
 
 	virtual string composeExecutableFile(const string& name) override;
+
+	virtual string composeMode(const string& mode) override;
 };

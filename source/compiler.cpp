@@ -36,3 +36,15 @@ string ClangCompiler::composeExecutable(const string& executableFile) {
 string ClangCompiler::composeExecutableFile(const string& name) {
 	return name;
 }
+
+string ClangCompiler::composeMode(const string& mode) {
+	if (mode == "release") {
+		return "-O2 -Wall";
+	}
+	
+	if (mode == "debug") {
+		return "-O0 -g -Wall";
+	}
+
+	return "";
+}

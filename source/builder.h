@@ -34,6 +34,10 @@ class Builder {
 public:
 	Builder(Compiler& compiler, Project& project);
 
+	void setVerbose(bool verbose = true);
+
+	void setMode(const string& mode);
+
 	void build();
 
 	void run(const vector<string>& arguments);
@@ -50,4 +54,7 @@ private:
 	Project& _project;
 	ProjectGraph _projectGraph;
 	BuilderCache _cache;
+
+	string _mode;
+	bool _verbose = false;
 };

@@ -15,6 +15,15 @@ You should get:
 hello world!
 ~~~
 
+By default the mode is release and enabling all warning
+~~~ sh
+prau build --mode release # -O2
+prau build --mode debug   # -O0 -g
+
+prau build --warning all  # -Wall -Wextra
+prau build --warning none #
+~~~
+
 ## Task-List
 - [ ] Build system
     - [x] Source parser
