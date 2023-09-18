@@ -4,7 +4,7 @@
 
 class SourceParser {
 public:
-	void parse(const std::string& content) {
+	void parse(const string& content) {
 		_lexer.tokenize(content);
 		_index = 0;
 

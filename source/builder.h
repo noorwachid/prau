@@ -32,13 +32,11 @@ private:
 
 class Builder {
 public:
-	bool verbose = true;
-
 	Builder(Compiler& compiler, Project& project);
 
 	void build();
 
-	void run();
+	void run(const vector<string>& arguments);
 
 	void clean();
 
@@ -50,6 +48,6 @@ private:
 private:
 	Compiler& _compiler;
 	Project& _project;
-	ProjectGraph _projectSource;
+	ProjectGraph _projectGraph;
 	BuilderCache _cache;
 };

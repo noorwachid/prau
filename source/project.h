@@ -15,12 +15,11 @@ struct Project {
 
 	vector<string> sources;
 	vector<string> headers;
-	vector<string> headerDirectories;
+	vector<string> headerPaths;
 
 	vector<string> libraries;
-	vector<string> libraryDirectories;
+	vector<string> libraryPaths;
 
-	vector<string> assets;
 	vector<string> dependencies;
 };
 
@@ -61,15 +60,13 @@ namespace YAML {
 				node["sources"] = project.sources;
 			if (!project.headers.empty())
 				node["headers"] = project.headers;
-			if (!project.headerDirectories.empty())
-				node["header-directories"] = project.headerDirectories;
+			if (!project.headerPaths.empty())
+				node["headerPaths"] = project.headerPaths;
 			if (!project.libraries.empty())
 				node["librarys"] = project.libraries;
-			if (!project.libraryDirectories.empty())
-				node["library-directories"] = project.libraryDirectories;
+			if (!project.libraryPaths.empty())
+				node["libraryPaths"] = project.libraryPaths;
 
-			if (!project.assets.empty())
-				node["assets"] = project.assets;
 			if (!project.dependencies.empty())
 				node["dependencies"] = project.dependencies;
 
@@ -98,15 +95,13 @@ namespace YAML {
 				project.sources = node["sources"].as<vector<string>>();
 			if (node["headers"] && node["headers"].IsSequence())
 				project.headers = node["headers"].as<vector<string>>();
-			if (node["header-directories"] && node["header-directories"].IsSequence())
-				project.headerDirectories = node["header-directories"].as<vector<string>>();
+			if (node["headerPaths"] && node["headerPaths"].IsSequence())
+				project.headerPaths = node["headerPaths"].as<vector<string>>();
 			if (node["libraries"] && node["libraries"].IsSequence())
 				project.libraries = node["libraries"].as<vector<string>>();
-			if (node["library-directories"] && node["library-directories"].IsSequence())
-				project.libraryDirectories = node["library-directories"].as<vector<string>>();
+			if (node["libraryPaths"] && node["libraryPaths"].IsSequence())
+				project.libraryPaths = node["libraryPaths"].as<vector<string>>();
 
-			if (node["assets"] && node["assets"].IsSequence())
-				project.assets = node["assets"].as<vector<string>>();
 			if (node["dependencies"] && node["dependencies"].IsSequence())
 				project.dependencies = node["dependencies"].as<vector<string>>();
 

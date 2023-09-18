@@ -61,7 +61,7 @@ void ProjectGraphLoader::add(const string& source) {
 			continue;
 		}
 
-		for (const string& directory : _project.headerDirectories) {
+		for (const string& directory : _project.headerPaths) {
 			string differentDirectory = directory + "/" + dependency;
 
 			if (fs::exists(differentDirectory)) {

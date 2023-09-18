@@ -21,7 +21,7 @@ license: BSD-3
 
 # OPTIONAL
 # url 
-url: https://noorwach.id/praudhemit
+url: https://noorwach.id/prau
 
 # OPTIONAL
 authors:
@@ -55,7 +55,7 @@ headers:
 
 # OPTIONAL
 # list of macro include paths
-header-paths:
+headerPaths:
   - source
 
 # OPTIONAL
@@ -65,7 +65,7 @@ libraries:
 
 # OPTIONAL
 # list of library search paths
-library-paths:
+libraryPaths:
   - library
 
 # OPTIONAL
@@ -79,9 +79,8 @@ resources:
 # OPTIONAL
 # list of dependency projects
 dependencies:
-  fmt: 0.16.0
-  boostasio: 0.17.3
-  boostfilesystem: 0.17.3
+  - dependency/fft
+  - dependency/graphics
 
 # OPTIONAL
 # all of the above configurations
@@ -90,7 +89,7 @@ dependencies:
 # - linux
 # - darwin
 # - web
-on-platforms:
+onPlatforms:
   darwin:
     sources:
       - source/platform/darwin.cpp

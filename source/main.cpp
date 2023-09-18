@@ -62,7 +62,7 @@ void clean() {
 	builder.clean();
 }
 
-void run() {
+void run(const vector<string>& arguments) {
 	string projectPath = getProjectPath();
 	if (projectPath.empty()) {
 		return;
@@ -72,7 +72,7 @@ void run() {
 	Project project = ProjectLoader::load(projectPath);
 	Builder builder(*compiler, project);
 
-	builder.run();
+	builder.run(arguments);
 }
 
 void create(const string& directory) {
@@ -110,7 +110,11 @@ int main(int argc, char** argv) {
 		}
 
 		if (command == "run") {
-			run();
+			vector<string> arguments;
+			for (int i = 2; i < argc; ++i) {
+				arguments.push_back(argv[i]);
+			}
+			run(arguments);
 			return 0;
 		}
 

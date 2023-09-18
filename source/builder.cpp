@@ -77,22 +77,48 @@ vector<string> BuilderCache::getInvalidSources() const {
 }
 
 Builder::Builder(Compiler& compiler, Project& project)
-	: _compiler(compiler), _project(project), _projectSource(ProjectGraphLoader::load(project)),
-	  _cache(project, _projectSource) {
+	: _compiler(compiler), _project(project), _projectGraph(ProjectGraphLoader::load(project)),
+	  _cache(project, _projectGraph) {
 }
 
 void Builder::build() {
+	if (!_project.dependencies.empty()) {
+		for (const string& dependency: _project.dependencies) {
+			string subprojectFile = dependency + "/project.prau";
+
+			if (!fs::exists(subprojectFile)) {
+				continue;
+			}
+
+			Project subproject = ProjectLoader::load(dependency + "/project.prau");
+
+			for (size_t i = 0; i < subproject.headerPaths.size(); ++i) {
+				subproject.headerPaths[i] = dependency + "/" + subproject.headerPaths[i];
+				_project.headerPaths.push_back(subproject.headerPaths[i]);
+			}
+
+			for (size_t i = 0; i < subproject.sources.size(); ++i) {
+				subproject.sources[i] = dependency + "/" + subproject.sources[i];
+			}
+
+			Builder builder(_compiler, subproject);
+			builder.build();
+			_project.libraries.push_back(subproject.name);
+		}
+	}
+
 	_cache.validate();
 
 	if (_cache.isValid()) {
-		cout << "no work to do\n";
+		string log = string("[") + Term::yellowFG + _project.name + Term::reset + "] no work to do\n";
+		cout << log;
 		return;
 	}
 
 	string flags;
 	flags += " " + _compiler.composeStandard(_project.standard);
 
-	for (const string& directory : _project.headerDirectories) {
+	for (const string& directory : _project.headerPaths) {
 		flags += " " + _compiler.composeHeaderDirectory(directory);
 	}
 
@@ -127,11 +153,9 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 
 		pid_t pid = fork();
 		if (pid == 0) {
-			system(command.c_str());
-
 			cout << log;
-
-			if (verbose)
+			int result = system(command.c_str());
+			if (result != 0)
 				cout << (command + "\n");
 
 			exit(0);
@@ -146,6 +170,10 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 
 bool Builder::link(const string& flags) {
 	string objects;
+
+	for (const string& library: _project.libraries) {
+		objects += " build/library/" + _compiler.composeLibraryFile(library);
+	}
 
 	for (const string& source : _project.sources) {
 		objects += " build/object/" + _project.name + "/" + _compiler.composeObjectFile(source);
@@ -172,23 +200,8 @@ bool Builder::link(const string& flags) {
 
 		cout << log;
 
-		if (verbose)
-			cout << (command + "\n");
-
 		if (system(command.c_str()) != 0) {
-			string log;
-			log += "[";
-			log += Term::yellowFG;
-			log += _project.name;
-			log += Term::reset;
-			log += "] ";
-			log += Term::greenFG;
-			log += "failed";
-			log += Term::reset;
-			log += "\n";
-
-			cout << log;
-
+			cout << (command + "\n");
 			return false;
 		}
 	}
@@ -214,10 +227,8 @@ bool Builder::link(const string& flags) {
 
 		cout << log;
 
-		if (verbose)
-			cout << (command + "\n");
-
 		if (system(command.c_str()) != 0) {
+			cout << (command + "\n");
 			return false;
 		}
 	}
@@ -225,14 +236,35 @@ bool Builder::link(const string& flags) {
 	return true;
 }
 
-void Builder::run() {
+void Builder::run(const vector<string>& arguments) {
 	if (_project.type != "executable") {
 		cout << "the project's type is not an executable\n";
 		return;
 	}
 
+	bool dependencyInvalid = false;
+
+	if (!_project.dependencies.empty()) {
+		for (const string& dependency: _project.dependencies) {
+			string subprojectFile = dependency + "/project.prau";
+
+			if (!fs::exists(subprojectFile)) {
+				continue;
+			}
+
+			Project subproject = ProjectLoader::load(dependency + "/project.prau");
+			ProjectGraph subprojectGraph = ProjectGraphLoader::load(subproject);
+			BuilderCache subprojectCache(subproject, subprojectGraph);
+
+			subprojectCache.validate();
+			if (!subprojectCache.isValid()) {
+				dependencyInvalid = true;
+			}
+		}
+	}
+
 	_cache.validate();
-	if (!_cache.isValid()) {
+	if (!_cache.isValid() || dependencyInvalid) {
 		build();
 	}
 
@@ -242,7 +274,12 @@ void Builder::run() {
 		return;
 	}
 
-	system(("./" + executablePath).c_str());
+	string executableArguments;
+	for (const string& argument: arguments) {
+		executableArguments += ' ' + argument;
+	}
+
+	system(("./" + executablePath + executableArguments).c_str());
 	return;
 }
 
