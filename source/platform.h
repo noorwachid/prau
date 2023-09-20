@@ -18,4 +18,6 @@
 
 namespace Platform {
 	string get();
+
+	string pickDefaultCompiler();
 }

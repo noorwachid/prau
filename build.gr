@@ -1,0 +1,20 @@
+> Base Rule
+
+> Project Build
+- Any header changes will recompile the references and relinks.
+- Any cpp changes will recompile the cpp and relinks.
+---
+projectA:
+  a.cpp:
+    dependenOn:
+	  a.h
+---
+
+> Dependency Build
+- Any dependency header changes on the dependency will recompile and relink the references.
+- Any dependency cpp changes will relink the the references.
+---
+projectA:
+  dependeOn:
+    - projectB
+---

@@ -1,93 +1,10 @@
 #include "builder.h"
 #include "platform.h"
 #include "starter.h"
-
-string getProjectPath() {
-	string projectPath = ProjectPath::generate(".");
-
-	if (!fs::exists(projectPath)) {
-		cout << "project file were not found\n";
-		return "";
-	}
-
-	return projectPath;
-}
-
-void infoProject() {
-	string projectPath = getProjectPath();
-	if (projectPath.empty()) {
-		return;
-	}
-
-	Project project = ProjectLoader::load(projectPath);
-	YAML::Node projectNode;
-	projectNode = project;
-	cout << projectNode << "\n";
-}
-
-void infoProjectGraph() {
-	string projectPath = getProjectPath();
-	if (projectPath.empty()) {
-		return;
-	}
-
-	Project project = ProjectLoader::load(projectPath);
-	ProjectGraph projectSource = ProjectGraphLoader::load(project);
-	YAML::Node projectSourceNode;
-	projectSourceNode = projectSource;
-
-	cout << projectSourceNode << "\n";
-}
-
-void build(const string& mode, bool verbose) {
-	string projectPath = getProjectPath();
-	if (projectPath.empty()) {
-		return;
-	}
-
-	Compiler* compiler = new ClangCompiler();
-	Project project = ProjectLoader::load(projectPath);
-	Builder builder(*compiler, project);
-	builder.setMode(mode);
-	builder.setVerbose(verbose);
-	builder.build();
-}
-
-void clean() {
-	string projectPath = getProjectPath();
-	if (projectPath.empty()) {
-		return;
-	}
-
-	Compiler* compiler = new ClangCompiler();
-	Project project = ProjectLoader::load(projectPath);
-	Builder builder(*compiler, project);
-	builder.clean();
-}
-
-void run(const string& mode, bool verbose, const vector<string>& arguments) {
-	string projectPath = getProjectPath();
-	if (projectPath.empty()) {
-		return;
-	}
-
-	Compiler* compiler = new ClangCompiler();
-	Project project = ProjectLoader::load(projectPath);
-	Builder builder(*compiler, project);
-	builder.setMode(mode);
-	builder.setVerbose(verbose);
-	builder.run(arguments);
-}
-
-void create(const string& directory) {
-	if (fs::exists(directory)) {
-		cout << directory << " already exists\n";
-		return;
-	}
-
-	Starter starter;
-	starter.generate(directory);
-}
+#include "workspace.h"
+#include "compiler/gcccompiler.h"
+#include "compiler/clangcompiler.h"
+#include "compiler/emscriptencompiler.h"
 
 int main(int argc, char** argv) {
 	if (argc < 2) {
@@ -98,6 +15,7 @@ int main(int argc, char** argv) {
 	string command = argv[1];
 	string mode = "release";
 	string platform = Platform::get();
+	string compilerName = Platform::pickDefaultCompiler();
 	bool verbose = false;
 
 	vector<string> forwardedArguments;
@@ -122,45 +40,58 @@ int main(int argc, char** argv) {
 				++i;
 			}
 
+			if (argument == "--compiler" && i + 1 < argc) {
+				compilerName = argv[i + 1];
+				++i;
+			}
+
 			if (argument == "--verbose") {
 				verbose = true;
 			}
 		}
 	}
 
+	if (platform.empty()) {
+		platform = Platform::get();
+	}
+
+	if (compilerName.empty()) {
+		compilerName = Platform::pickDefaultCompiler();
+	}
+
+	Compiler* compiler = nullptr;
+
+	if (compilerName == "gcc") {
+		compiler = new GCCCompiler();
+	} else if (compilerName == "clang") {
+		compiler = new ClangCompiler();
+	} else if (compilerName == "emscripten") {
+		compiler = new EmscriptenCompiler();
+	} else {
+		cout << "unsupported compiler\n";
+		return 0;
+	}
+
+	Workspace workspace(*compiler);
+
 	try {
-		if (command == "info-project") {
-			infoProject();
-			return 0;
-		}
-
-		if (command == "info-project-graph") {
-			infoProjectGraph();
-			return 0;
-		}
-
 		if (command == "build") {
-			build(mode, verbose);
+			workspace.build();
 			return 0;
 		}
 
 		if (command == "run") {
-			run(mode, verbose, forwardedArguments);
+			workspace.run();
 			return 0;
 		}
 
-		if (command == "create") {
-			if (argc < 3) {
-				cout << "please specify the new directory\n";
-				return 0;
-			}
-
-			create(argv[2]);
+		if (command == "show") {
+			workspace.show();
 			return 0;
 		}
 
-		if (command == "clean") {
-			clean();
+		if (command == "show-graph") {
+			workspace.showGraph();
 			return 0;
 		}
 

@@ -76,9 +76,9 @@ vector<string> BuilderCache::getInvalidSources() const {
 	return vector<string>(_invalidSources.begin(), _invalidSources.end());
 }
 
-Builder::Builder(Compiler& compiler, Project& project)
+Builder::Builder(Compiler& compiler, Project& project, const vector<string>& dependencies)
 	: _compiler(compiler), _project(project), _projectGraph(ProjectGraphLoader::load(project)),
-	  _cache(project, _projectGraph) {
+	  _cache(project, _projectGraph), _dependencies(dependencies) {
 }
 
 void Builder::setVerbose(bool verbose) {
@@ -89,40 +89,17 @@ void Builder::setMode(const string& mode) {
 	_mode = mode;
 }
 
-void Builder::build() {
-	if (!_project.dependencies.empty()) {
-		for (const string& dependency: _project.dependencies) {
-			string subprojectFile = dependency + "/project.prau";
+BuildResult Builder::build() {
+	BuildResult result;
 
-			if (!fs::exists(subprojectFile)) {
-				continue;
-			}
-
-			Project subproject = ProjectLoader::load(dependency + "/project.prau");
-
-			for (size_t i = 0; i < subproject.headerPaths.size(); ++i) {
-				subproject.headerPaths[i] = dependency + "/" + subproject.headerPaths[i];
-				_project.headerPaths.push_back(subproject.headerPaths[i]);
-			}
-
-			for (size_t i = 0; i < subproject.sources.size(); ++i) {
-				subproject.sources[i] = dependency + "/" + subproject.sources[i];
-			}
-
-			Builder builder(_compiler, subproject);
-			builder.setMode(_mode);
-			builder.setVerbose(_verbose);
-			builder.build();
-			_project.libraries.push_back(subproject.name);
-		}
-	}
+	bool recompiling = false;
 
 	_cache.validate();
 
 	if (_cache.isValid()) {
 		string log = string("[") + Term::yellowFG + _project.name + Term::reset + "] no work to do\n";
 		cout << log;
-		return;
+		return result;
 	}
 
 	string flags;
@@ -135,14 +112,18 @@ void Builder::build() {
 	vector<string> invalidSources = _cache.getInvalidSources();
 
 	if (!compile(flags, !invalidSources.empty() ? invalidSources : _project.sources)) {
-		return;
+		return result;
 	}
 
 	if (!link(flags)) {
-		return;
+		return result;
 	}
 
 	_cache.invalidate();
+
+	result.recompiling = true;
+
+	return result;
 }
 
 bool Builder::compile(const string& flags, const vector<string>& sources) {
@@ -184,8 +165,8 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 bool Builder::link(const string& flags) {
 	string objects;
 
-	for (const string& library: _project.libraries) {
-		objects += " build/library/" + _compiler.composeLibraryFile(library);
+	for (const string& dependency: _dependencies) {
+		objects += " build/library/" + _compiler.composeLibraryFile(dependency);
 	}
 
 	for (const string& source : _project.sources) {

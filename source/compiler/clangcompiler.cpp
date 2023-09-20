@@ -1,5 +1,4 @@
-#include "compiler.h"
-#include "platform.h"
+#include "clangcompiler.h"
 
 string ClangCompiler::getProgram() {
 	return "clang++";
@@ -48,3 +47,4 @@ string ClangCompiler::composeMode(const string& mode) {
 
 	return "";
 }
+

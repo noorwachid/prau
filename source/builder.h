@@ -30,15 +30,19 @@ private:
 	unordered_set<string> _invalidSources;
 };
 
+struct BuildResult {
+	bool recompiling = false;
+};
+
 class Builder {
 public:
-	Builder(Compiler& compiler, Project& project);
+	Builder(Compiler& compiler, Project& project, const vector<string>& dependencies);
 
 	void setVerbose(bool verbose = true);
 
 	void setMode(const string& mode);
 
-	void build();
+	BuildResult build();
 
 	void run(const vector<string>& arguments);
 
@@ -54,6 +58,7 @@ private:
 	Project& _project;
 	ProjectGraph _projectGraph;
 	BuilderCache _cache;
+	vector<string> _dependencies;
 
 	string _mode;
 	bool _verbose = false;
