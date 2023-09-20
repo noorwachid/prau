@@ -37,6 +37,13 @@ You should get:
 hello world!
 ~~~
 
+## Commands
+#### build
+Compile and link project
+~~~ sh
+prau build
+~~~
+
 By default the mode is release and enabling all warning
 ~~~ sh
 prau build --mode release # -O2
@@ -46,7 +53,31 @@ prau build --warning all  # -Wall -Wextra
 prau build --warning none #
 ~~~
 
+#### clean
+Remove all generated objects, libraries and executable.
+~~~ sh
+prau clean
+~~~
+
+#### run
+Execute if the project type is executable
+~~~ sh
+prau run
+~~~
+
 To pass command line arguments to your executable:
 ~~~ sh
 prau run -- a b c
+~~~
+
+#### init
+Initialize empty folder with hello world project
+~~~ sh
+prau init
+~~~
+
+#### show
+Show the project dependency graph
+~~~ sh
+prau show
 ~~~
