@@ -3,7 +3,7 @@ C++ build system
 
 [UNDER DEVELOPMENT]
 
-TLDR; If you are an "expert" C++ should use CMake instead.
+TLDR; If you are an "expert" C++, you should use CMake instead.
 
 But if you are dumb to understand what CMake actually does,
 Welcome to my dead simple build system.
