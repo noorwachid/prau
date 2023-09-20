@@ -103,7 +103,7 @@ BuildResult Builder::build() {
 
 	if (_cache.isValid()) {
 		for (const BuildDependency& dependency: _dependencies) {
-			if (dependency.recompiling) {
+			if (!dependency.headerOnly && dependency.recompiling) {
 				result.recompiling = true;
 			}
 		}
@@ -175,10 +175,16 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 }
 
 bool Builder::link(const string& flags) {
+	if (_project.sources.empty()) {
+		return true;
+	}
+
 	string objects;
 
 	for (const BuildDependency& dependency: _dependencies) {
-		objects += " build/library/" + _compiler.composeLibraryFile(dependency.project);
+		if (!dependency.headerOnly) {
+			objects += " build/library/" + _compiler.composeLibraryFile(dependency.project);
+		}
 	}
 
 	for (const string& source : _project.sources) {

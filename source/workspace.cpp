@@ -92,6 +92,7 @@ void Workspace::build() {
 			BuildDependency buildDependency;
 			buildDependency.project = _projects[dependency].name;
 			buildDependency.recompiling = recompiling.count(buildDependency.project);
+			buildDependency.headerOnly = _projects[dependency].sources.empty();
 			buildDependencies.push_back(buildDependency);
 		}
 

@@ -6,7 +6,7 @@
 ---
 projectA:
   a.cpp:
-    dependenOn:
+    dependOn:
 	  a.h
 ---
 
@@ -15,6 +15,6 @@ projectA:
 - Any dependency cpp changes will relink the the references.
 ---
 projectA:
-  dependeOn:
+  dependOn:
     - projectB
 ---

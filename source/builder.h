@@ -35,6 +35,7 @@ struct BuildResult {
 };
 
 struct BuildDependency {
+	bool headerOnly = false;
 	bool recompiling = false;
 	string project;
 };
