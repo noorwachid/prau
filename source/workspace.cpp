@@ -1,7 +1,11 @@
 #include "workspace.h"
 #include "project.h"
+#include "projecttemplate.h"
 
 Workspace::Workspace(Compiler& compiler, const unordered_map<string, string>& options): _compiler(compiler), _options(options) {
+}
+
+void Workspace::bootstrap() {
 	loadProject("");
 
 	for (const string& path: _parsingOrderPaths) {
@@ -126,7 +130,7 @@ void Workspace::build() {
 	}
 }
 
-void Workspace::run() {
+void Workspace::run(const vector<string>& arguments) {
 	for (auto& [path, project]: _projects) {
 		Builder builder(_compiler, project, {});
 		if (builder.requireRebuilding()) {
@@ -137,5 +141,15 @@ void Workspace::run() {
 
 	Project& project = _projects[""];
 	string command = "./build/executable/" + _compiler.composeExecutableFile(project.name);
+
+	for (const string& argument: arguments) {
+		command += " " + argument;
+	}
+
 	system(command.c_str());
+}
+
+void Workspace::init() {
+	ProjectTemplate projectTemplate;
+	projectTemplate.generate();
 }

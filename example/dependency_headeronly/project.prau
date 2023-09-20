@@ -1,0 +1,9 @@
+name: headeronly
+type: executable
+language: cpp
+standard: 17
+sources:
+  - main.cpp
+dependencies:
+  - dependency/a
+  

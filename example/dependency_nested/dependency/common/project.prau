@@ -1,0 +1,9 @@
+name: common
+description: a starter template
+type: library
+language: cpp
+standard: 17
+headerPaths:
+  - source
+sources:
+  - source/common.cpp

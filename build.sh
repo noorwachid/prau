@@ -4,8 +4,8 @@ clang++ -std=c++17 -O2 -o prau -Idependency/yaml/include \
 	source/platform.cpp \
 	source/project.cpp \
 	source/projectgraph.cpp \
+	source/projecttemplate.cpp \
 	source/builder.cpp \
-	source/starter.cpp \
 	source/workspace.cpp \
 	source/compiler/gcccompiler.cpp \
 	source/compiler/clangcompiler.cpp \

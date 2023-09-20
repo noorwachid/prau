@@ -3,7 +3,7 @@
 #include "common.h"
 #include "project.h"
 
-class Starter {
+class ProjectTemplate {
 public:
-	void generate(const string& directory);
+	void generate();
 };

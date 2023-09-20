@@ -1,13 +1,13 @@
-#include "starter.h"
+#include "projecttemplate.h"
 
-void Starter::generate(const string& directory) {
-	string sourceDirectory = directory + "/source";
-	string projectPath = ProjectPath::generate(directory);
+void ProjectTemplate::generate() {
+	string sourceDirectory = "source";
+	string projectPath = ProjectPath::generate(".");
 	string mainPath = sourceDirectory + "/main.cpp";
 
 	Project project;
-	project.name = fs::path(directory).filename();
-	project.description = "a starter template";
+	project.name = "helloworld";
+	project.description = "a hello world project";
 	project.type = "executable";
 	project.language = "cpp";
 	project.standard = "17";

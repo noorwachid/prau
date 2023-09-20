@@ -1,0 +1,11 @@
+name: simple-library
+description: a starter template
+type: library
+language: cpp
+standard: 17
+headerPaths:
+  - source
+headers:
+  - source/library.h
+sources:
+  - source/library.cpp

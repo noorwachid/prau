@@ -1,0 +1,8 @@
+name: a
+type: library
+language: cpp
+standard: 17
+headerPaths:
+  - source
+  
+

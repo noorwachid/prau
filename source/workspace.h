@@ -8,6 +8,8 @@
 class Workspace {
 public:
 	Workspace(Compiler& compiler, const unordered_map<string, string>& options);
+	
+	void bootstrap();
 
 	void show();
 
@@ -17,7 +19,9 @@ public:
 
 	void clean();
 
-	void run();
+	void run(const vector<string>& arguments);
+
+	void init();
 
 private:
 	bool loadProject(const string& path);

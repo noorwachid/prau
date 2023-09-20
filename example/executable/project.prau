@@ -1,0 +1,7 @@
+name: simple-executable
+description: a starter template
+type: executable
+language: cpp
+standard: 17
+sources:
+  - source/main.cpp

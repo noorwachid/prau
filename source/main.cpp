@@ -1,6 +1,4 @@
-#include "builder.h"
 #include "platform.h"
-#include "starter.h"
 #include "workspace.h"
 #include "compiler/gcccompiler.h"
 #include "compiler/clangcompiler.h"
@@ -77,6 +75,7 @@ int main(int argc, char** argv) {
 
 	try {
 		if (command == "build") {
+			workspace.bootstrap();
 			workspace.build();
 			return 0;
 		}
@@ -87,17 +86,19 @@ int main(int argc, char** argv) {
 		}
 
 		if (command == "run") {
-			workspace.run();
+			workspace.bootstrap();
+			workspace.run(forwardedArguments);
+			return 0;
+		}
+
+		if (command == "init") {
+			workspace.init();
 			return 0;
 		}
 
 		if (command == "show") {
+			workspace.bootstrap();
 			workspace.show();
-			return 0;
-		}
-
-		if (command == "show-graph") {
-			workspace.showGraph();
 			return 0;
 		}
 
