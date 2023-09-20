@@ -50,9 +50,7 @@ public:
 
 	BuildResult build();
 
-	void run(const vector<string>& arguments);
-
-	void clean();
+	bool requireRebuilding();
 
 private:
 	bool compile(const string& flags, const vector<string>& sources);

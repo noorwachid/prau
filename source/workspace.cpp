@@ -1,7 +1,7 @@
 #include "workspace.h"
 #include "project.h"
 
-Workspace::Workspace(Compiler& compiler): _compiler(compiler) {
+Workspace::Workspace(Compiler& compiler, const unordered_map<string, string>& options): _compiler(compiler), _options(options) {
 	loadProject("");
 
 	for (const string& path: _parsingOrderPaths) {
@@ -80,6 +80,21 @@ void Workspace::show() {
 void Workspace::showGraph() {
 }
 
+void Workspace::clean() {
+	if (!fs::exists(ProjectPath::generate("."))) {
+		cout << "whoa there's no project file in this directory, careful dude\n";
+		return;
+	}
+
+	if (!fs::exists("build")) {
+		cout << "already clean\n";
+		return;
+	}
+
+	fs::remove_all("build");
+	cout << "cleaned up\n";
+}
+
 void Workspace::build() {
 	unordered_set<string> recompiling;
 
@@ -97,7 +112,12 @@ void Workspace::build() {
 		}
 
 		Builder builder(_compiler, project, buildDependencies);
-		builder.setVerbose();
+		builder.setMode(_options["mode"]);
+
+		if (_options.count("verbose")) {
+			builder.setVerbose();
+		}
+
 		BuildResult result = builder.build();
 
 		if (result.recompiling) {
@@ -107,4 +127,15 @@ void Workspace::build() {
 }
 
 void Workspace::run() {
+	for (auto& [path, project]: _projects) {
+		Builder builder(_compiler, project, {});
+		if (builder.requireRebuilding()) {
+			build();
+			break;
+		}
+	}
+
+	Project& project = _projects[""];
+	string command = "./build/executable/" + _compiler.composeExecutableFile(project.name);
+	system(command.c_str());
 }

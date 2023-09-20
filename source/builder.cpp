@@ -89,6 +89,12 @@ void Builder::setMode(const string& mode) {
 	_mode = mode;
 }
 
+bool Builder::requireRebuilding() {
+	_cache.validate();
+
+	return !_cache.isValid();
+}
+
 BuildResult Builder::build() {
 	BuildResult result;
 
@@ -250,66 +256,4 @@ bool Builder::link(const string& flags) {
 	}
 
 	return true;
-}
-
-void Builder::run(const vector<string>& arguments) {
-	if (_project.type != "executable") {
-		cout << "the project's type is not an executable\n";
-		return;
-	}
-
-	bool dependencyInvalid = false;
-
-	if (!_project.dependencies.empty()) {
-		for (const string& dependency: _project.dependencies) {
-			string subprojectFile = dependency + "/project.prau";
-
-			if (!fs::exists(subprojectFile)) {
-				continue;
-			}
-
-			Project subproject = ProjectLoader::load(dependency + "/project.prau");
-			ProjectGraph subprojectGraph = ProjectGraphLoader::load(subproject);
-			BuilderCache subprojectCache(subproject, subprojectGraph);
-
-			subprojectCache.validate();
-			if (!subprojectCache.isValid()) {
-				dependencyInvalid = true;
-			}
-		}
-	}
-
-	_cache.validate();
-	if (!_cache.isValid() || dependencyInvalid) {
-		build();
-	}
-
-	string executablePath = "build/executable/" + _compiler.composeExecutableFile(_project.name);
-	if (!fs::exists(executablePath)) {
-		cout << "no executable were found\n";
-		return;
-	}
-
-	string executableArguments;
-	for (const string& argument: arguments) {
-		executableArguments += ' ' + argument;
-	}
-
-	system(("./" + executablePath + executableArguments).c_str());
-	return;
-}
-
-void Builder::clean() {
-	if (!fs::exists(ProjectPath::generate("."))) {
-		cout << "whoa there's no project file in this directory, careful dude\n";
-		return;
-	}
-
-	if (!fs::exists("build")) {
-		cout << "already clean\n";
-		return;
-	}
-
-	fs::remove_all("build");
-	cout << "cleaned up\n";
 }

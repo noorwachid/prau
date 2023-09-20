@@ -13,10 +13,7 @@ int main(int argc, char** argv) {
 	}
 
 	string command = argv[1];
-	string mode = "release";
-	string platform = Platform::get();
-	string compilerName = Platform::pickDefaultCompiler();
-	bool verbose = false;
+	unordered_map<string, string> options;
 
 	vector<string> forwardedArguments;
 
@@ -31,52 +28,61 @@ int main(int argc, char** argv) {
 			}
 
 			if (argument == "--mode" && i + 1 < argc) {
-				mode = argv[i + 1];
+				options["mode"] = argv[i + 1];
 				++i;
 			}
 
 			if (argument == "--platform" && i + 1 < argc) {
-				platform = argv[i + 1];
+				options["platform"] = argv[i + 1];
 				++i;
 			}
 
 			if (argument == "--compiler" && i + 1 < argc) {
-				compilerName = argv[i + 1];
+				options["compiler"] = argv[i + 1];
 				++i;
 			}
 
 			if (argument == "--verbose") {
-				verbose = true;
+				options["verbose"] = "1";
 			}
 		}
 	}
 
-	if (platform.empty()) {
-		platform = Platform::get();
+	if (options.count("mode") == 0) {
+		options["mode"] = "release";
 	}
 
-	if (compilerName.empty()) {
-		compilerName = Platform::pickDefaultCompiler();
+	if (options.count("platform") == 0) {
+		options["platform"] =  Platform::get();
+	}
+
+	if (options.count("compiler") == 0) {
+		options["compiler"] = Platform::pickDefaultCompiler();
 	}
 
 	Compiler* compiler = nullptr;
 
-	if (compilerName == "gcc") {
+	if (options["compiler"] == "gcc") {
 		compiler = new GCCCompiler();
-	} else if (compilerName == "clang") {
+	} else if (options["compiler"] == "clang") {
 		compiler = new ClangCompiler();
-	} else if (compilerName == "emscripten") {
+	} else if (options["compiler"] == "emscripten") {
 		compiler = new EmscriptenCompiler();
 	} else {
 		cout << "unsupported compiler\n";
 		return 0;
 	}
 
-	Workspace workspace(*compiler);
+	Workspace workspace(*compiler, options);
 
 	try {
 		if (command == "build") {
 			workspace.build();
+			return 0;
+		}
+
+		if (command == "clean") {
+			workspace.clean();
 			return 0;
 		}
 

@@ -7,7 +7,7 @@
 
 class Workspace {
 public:
-	Workspace(Compiler& compiler);
+	Workspace(Compiler& compiler, const unordered_map<string, string>& options);
 
 	void show();
 
@@ -15,12 +15,15 @@ public:
 
 	void build();
 
+	void clean();
+
 	void run();
 
 private:
 	bool loadProject(const string& path);
 
 private:
+	unordered_map<string, string> _options;
 	unordered_map<string, Project> _projects;
 
 	// build stages 
