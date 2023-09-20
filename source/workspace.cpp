@@ -81,18 +81,27 @@ void Workspace::showGraph() {
 }
 
 void Workspace::build() {
+	unordered_set<string> recompiling;
+
 	for (size_t i = _parsingOrderPaths.size(); i > 0; --i) {
 		Project& project = _projects[_parsingOrderPaths[i - 1]];
 
-		vector<string> dependencies;
+		vector<BuildDependency> buildDependencies;
+
 		for (const string& dependency: project.dependencies) {
-			const string& libraryName = _projects[dependency].name;
-			dependencies.push_back(libraryName);
+			BuildDependency buildDependency;
+			buildDependency.project = _projects[dependency].name;
+			buildDependency.recompiling = recompiling.count(buildDependency.project);
+			buildDependencies.push_back(buildDependency);
 		}
 
-		Builder builder(_compiler, project, dependencies);
+		Builder builder(_compiler, project, buildDependencies);
 		builder.setVerbose();
 		BuildResult result = builder.build();
+
+		if (result.recompiling) {
+			recompiling.insert(project.name);
+		}
 	}
 }
 

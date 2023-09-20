@@ -76,7 +76,7 @@ vector<string> BuilderCache::getInvalidSources() const {
 	return vector<string>(_invalidSources.begin(), _invalidSources.end());
 }
 
-Builder::Builder(Compiler& compiler, Project& project, const vector<string>& dependencies)
+Builder::Builder(Compiler& compiler, Project& project, const vector<BuildDependency>& dependencies)
 	: _compiler(compiler), _project(project), _projectGraph(ProjectGraphLoader::load(project)),
 	  _cache(project, _projectGraph), _dependencies(dependencies) {
 }
@@ -92,21 +92,34 @@ void Builder::setMode(const string& mode) {
 BuildResult Builder::build() {
 	BuildResult result;
 
-	bool recompiling = false;
-
-	_cache.validate();
-
-	if (_cache.isValid()) {
-		string log = string("[") + Term::yellowFG + _project.name + Term::reset + "] no work to do\n";
-		cout << log;
-		return result;
-	}
-
 	string flags;
 	flags += " " + _compiler.composeStandard(_project.standard);
 
 	for (const string& directory : _project.headerPaths) {
 		flags += " " + _compiler.composeHeaderDirectory(directory);
+	}
+
+	_cache.validate();
+
+	if (_cache.isValid()) {
+		for (const BuildDependency& dependency: _dependencies) {
+			if (dependency.recompiling) {
+				result.recompiling = true;
+			}
+		}
+
+		if (result.recompiling) {
+			if (!link(flags)) {
+				return result;
+			}
+
+			return result;
+		}
+
+		string log = string("[") + Term::yellowFG + _project.name + Term::reset + "] no work to do\n";
+		cout << log;
+
+		return result;
 	}
 
 	vector<string> invalidSources = _cache.getInvalidSources();
@@ -156,8 +169,7 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 		}
 	}
 
-	while (wait(NULL) > 0)
-		;
+	while (wait(NULL) > 0);
 
 	return true;
 }
@@ -165,8 +177,8 @@ bool Builder::compile(const string& flags, const vector<string>& sources) {
 bool Builder::link(const string& flags) {
 	string objects;
 
-	for (const string& dependency: _dependencies) {
-		objects += " build/library/" + _compiler.composeLibraryFile(dependency);
+	for (const BuildDependency& dependency: _dependencies) {
+		objects += " build/library/" + _compiler.composeLibraryFile(dependency.project);
 	}
 
 	for (const string& source : _project.sources) {

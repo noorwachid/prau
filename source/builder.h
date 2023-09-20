@@ -34,9 +34,14 @@ struct BuildResult {
 	bool recompiling = false;
 };
 
+struct BuildDependency {
+	bool recompiling = false;
+	string project;
+};
+
 class Builder {
 public:
-	Builder(Compiler& compiler, Project& project, const vector<string>& dependencies);
+	Builder(Compiler& compiler, Project& project, const vector<BuildDependency>& dependencies);
 
 	void setVerbose(bool verbose = true);
 
@@ -58,7 +63,7 @@ private:
 	Project& _project;
 	ProjectGraph _projectGraph;
 	BuilderCache _cache;
-	vector<string> _dependencies;
+	vector<BuildDependency> _dependencies;
 
 	string _mode;
 	bool _verbose = false;
