@@ -102,6 +102,19 @@ int main(int argc, char** argv) {
 			return 0;
 		}
 
+		if (command == "generate") {
+			if (argc < 3) {
+				cout << "please specify the target\n";
+				cout << "- sh (shell script)\n";
+				cout << "- cmake\n";
+				cout << "- clangd\n";
+				return 1;
+			}
+			workspace.bootstrap();
+			workspace.generate(argv[2]);
+			return 0;
+		}
+
 		cout << "unknown command\n";
 		return 0;
 	} catch (const std::exception& e) {

@@ -9,7 +9,7 @@ ProjectGraph ProjectGraphLoader::load(Project& project) {
 
 ProjectGraphLoader::ProjectGraphLoader(Project& project, ProjectGraph& projectGraph)
 	: _project(project), _projectGraph(projectGraph) {
-	for (const string source : project.sources) {
+	for (const string& source : project.sources) {
 		if (fs::exists(source)) {
 			add(source);
 		}

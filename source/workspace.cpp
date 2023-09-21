@@ -1,3 +1,4 @@
+#include "generator.h"
 #include "workspace.h"
 #include "project.h"
 #include "projecttemplate.h"
@@ -51,7 +52,6 @@ bool Workspace::loadProject(const string& path) {
 		}
 
 		Project& subProject = _projects[subProjectPath];
-		Project& project = _projects[projectPath];
 
 		for (string& source: subProject.sources) {
 			source = (fs::path(subProjectPath) / fs::path(source)).lexically_normal().string();
@@ -152,4 +152,9 @@ void Workspace::run(const vector<string>& arguments) {
 void Workspace::init() {
 	ProjectTemplate projectTemplate;
 	projectTemplate.generate();
+}
+
+void Workspace::generate(const string& target) {
+	Generator generator(*this);
+	generator.generate(target);
 }

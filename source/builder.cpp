@@ -30,7 +30,7 @@ void BuilderCache::validate() {
 	YAML::Node cacheProjectSourceNode = YAML::LoadFile(file);
 	ProjectGraph cacheProjectSource = cacheProjectSourceNode.as<ProjectGraph>();
 
-	for (const auto [source, detail] : _projectSource.sources) {
+	for (const auto& [source, detail] : _projectSource.sources) {
 		if (cacheProjectSource.sources.count(source)) {
 			if (cacheProjectSource.sources[source].modified != detail.modified) {
 				addInvalidSource(source);

@@ -3,15 +3,6 @@ C++ build system
 
 [UNDER DEVELOPMENT]
 
-TLDR; If you are an "expert" C++, you should use CMake instead.
-
-But if you are too dumb to understand what CMake actually does,
-Well to put it simply CMake is actually not a build system.
-It will generate Makefile which is configuration file of the native build system.
-And then compile and link the library or executable.
-
-Anyway, welcome to my dead simple build system.
-
 ## Installation
 I've tested it only on MacOS, but in theory should be working on GNU/Linux.
 Windows support is kind of hard to do, because I don't have a Windows machine.
@@ -81,3 +72,14 @@ Show the project dependency graph
 ~~~ sh
 prau show
 ~~~
+
+#### generate
+Configuration generator
+~~~ sh
+prau generate cmake
+~~~
+
+Supported targets:
+- sh (shell script)
+- cmake
+- clangd

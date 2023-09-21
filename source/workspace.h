@@ -22,11 +22,15 @@ public:
 	void run(const vector<string>& arguments);
 
 	void init();
+	
+	void generate(const string& target);
 
 private:
 	bool loadProject(const string& path);
 
 private:
+	Compiler& _compiler;
+
 	unordered_map<string, string> _options;
 	unordered_map<string, Project> _projects;
 
@@ -38,5 +42,6 @@ private:
 	
 	vector<string> _parsingOrderPaths;
 
-	Compiler& _compiler;
+	friend class Generator;
 };
+

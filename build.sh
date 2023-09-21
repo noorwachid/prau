@@ -1,4 +1,7 @@
-clang++ -std=c++17 -O2 -o prau -Idependency/yaml/include \
+clang++ \
+	-std=c++17 \
+	-O2 -Wall \
+	-Idependency/yaml/include \
 	source/main.cpp \
 	source/text.cpp \
 	source/platform.cpp \
@@ -6,6 +9,7 @@ clang++ -std=c++17 -O2 -o prau -Idependency/yaml/include \
 	source/projectgraph.cpp \
 	source/projecttemplate.cpp \
 	source/builder.cpp \
+	source/generator.cpp \
 	source/workspace.cpp \
 	source/compiler/gcccompiler.cpp \
 	source/compiler/clangcompiler.cpp \
@@ -38,4 +42,5 @@ clang++ -std=c++17 -O2 -o prau -Idependency/yaml/include \
 	dependency/yaml/src/simplekey.cpp \
 	dependency/yaml/src/singledocparser.cpp \
 	dependency/yaml/src/stream.cpp \
-	dependency/yaml/src/tag.cpp
+	dependency/yaml/src/tag.cpp \
+	-o prau
