@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <memory>
 
 // bleed the standard library
 // because this is final project
@@ -20,6 +21,8 @@ using std::to_string;
 using std::unordered_map;
 using std::unordered_set;
 using std::vector;
+using std::make_unique;
+using std::unique_ptr;
 
 namespace fs = std::filesystem;
 namespace chrono = std::chrono;

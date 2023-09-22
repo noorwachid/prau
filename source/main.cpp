@@ -58,14 +58,14 @@ int main(int argc, char** argv) {
 		options["compiler"] = Platform::pickDefaultCompiler();
 	}
 
-	Compiler* compiler = nullptr;
+	unique_ptr<Compiler> compiler = nullptr;
 
 	if (options["compiler"] == "gcc") {
-		compiler = new GCCCompiler();
+		compiler = make_unique<GCCCompiler>();
 	} else if (options["compiler"] == "clang") {
-		compiler = new ClangCompiler();
+		compiler = make_unique<ClangCompiler>();
 	} else if (options["compiler"] == "emscripten") {
-		compiler = new EmscriptenCompiler();
+		compiler = make_unique<EmscriptenCompiler>();
 	} else {
 		cout << "unsupported compiler\n";
 		return 0;

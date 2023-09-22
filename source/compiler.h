@@ -5,6 +5,8 @@
 
 class Compiler {
 public:
+	virtual ~Compiler() = default;
+
 	virtual string getProgram() = 0;
 
 	virtual string composeStandard(const string& standard) = 0;
