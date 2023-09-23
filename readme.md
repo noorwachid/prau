@@ -16,7 +16,7 @@ Building without optimatimization:
 | `make`                    | 34.74s user 4.20s system 96% cpu 40.324 total  |
 
 `ninja` is faster, 
-but you can use `prau` to generate CMakeList.txt` 
+but you can use `prau` to generate `CMakeList.txt`
 and then use `cmake` to generate the `build.ninja`
 because this benchmark do exactly that.
 
