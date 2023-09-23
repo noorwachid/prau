@@ -2,6 +2,11 @@
 C++ build system
 
 [UNDER DEVELOPMENT]
+TODO:
+- The parallel compilation is using subprocess, in default MacOS should be 256 per process.
+  Poll the subprocess to handle a project with more than subprocess limit.
+- Split the file reading into multiple threads.
+  
 
 ## Author Note
 I always recommend to use CMake instead. 
